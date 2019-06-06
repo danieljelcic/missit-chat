@@ -5,4 +5,5 @@ This repository contains the source for the Android chat app implementation of t
 # Team
 
 Dr. Fahad Dogar / Project Lead
+
 Daniel Jelcic / Developer
