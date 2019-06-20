@@ -10,17 +10,30 @@
     tools:showIn="@layout/activity_main">
 
     <TextView
+        android:id="@+id/versionDisplay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Version 0.1"
-        app:layout_constraintTop_toTopOf="parent"
-        android:id="@+id/versionDisplay" />
+        android:text="@string/version"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorMessageTextDark"
+        android:text="This is where the latest message will be displayed"
+        android:textColor="#FFF"
+        app:layout_constraintTop_toBottomOf="@id/versionDisplay"
+        android:id="@+id/latestMessage" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/messagesView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/messageEditContainer" />
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        app:stackFromEnd="true"
+        app:reverseLayout="true"
+        app:layout_constraintBottom_toTopOf="@+id/messageEditContainer"
+        app:layout_constraintTop_toBottomOf="@+id/latestMessage" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/messageEditContainer"

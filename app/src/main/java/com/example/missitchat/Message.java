@@ -22,4 +22,13 @@ public class Message {
     public boolean isReceived() {
         return received;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "messageBody='" + messageBody + '\'' +
+                ", memberData=" + memberData.toString() +
+                ", received=" + received +
+                '}';
+    }
 }

@@ -40,4 +40,12 @@ public class MemberData {
         }
         return sb.toString().substring(0, 7);
     }
+
+    @Override
+    public String toString() {
+        return "MemberData{" +
+                "name='" + name + '\'' +
+                ", color='" + color + '\'' +
+                '}';
+    }
 }

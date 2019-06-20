@@ -5,4 +5,5 @@
     <string name="sendButtonText">Send</string>
     <string name="message_sent_placeholder">My message</string>
     <string name="message_received_placeholder">Received message</string>
+    <string name="version">Version 0.11</string>
 </resources>

@@ -3,7 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="10dp"
+    android:paddingBottom="8dp"
     android:id="@+id/messageReceivedLayout">
 
     <TextView
@@ -12,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="Name Surname"
-        android:textSize="7dp"
+        android:textSize="10dp"
         app:layout_constraintStart_toEndOf="@+id/receivedAvatar"
         app:layout_constraintTop_toTopOf="parent"
         />
