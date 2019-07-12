@@ -6,7 +6,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,30 +16,15 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
 
-Issues
+public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.MessageHolder> {
 
-- received avatar square and not round   ✔
-- recycler view doesn't take up the whole screen   ✔
-- when only sending messages, they are all displayed, but are not scrollable   ✔
-- very strange spacing between received messages   ✔
-- crashes when receives a message after sending any   ✔
-- displays sent messages as received after receiving any   ✔
-
-
- */
-
-
-
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MessageHolder> {
-
-    private static final String TAG = "RecyclerViewAdapter";
+    private static final String TAG = "MessageViewAdapter";
 
     private List<Message> messages;
     private Context context;
 
-    RecyclerViewAdapter(Context context) {
+    MessageViewAdapter(Context context) {
         this.messages = new ArrayList<>();
         this.context = context;
     }
@@ -97,6 +81,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         this.messages.add(message);
         notifyItemInserted(messages.size() - 1);
+
+        // DEBUG
+        printMessages();
+    }
+
+    public void loadMessages(List<Message> messages) {
+
+        this.messages = messages;
+        notifyDataSetChanged();
 
         // DEBUG
         printMessages();

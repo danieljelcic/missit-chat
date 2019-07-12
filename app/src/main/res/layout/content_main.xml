@@ -5,79 +5,68 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    android:orientation="vertical"
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:id="@+id/versionDisplay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/version"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorMessageTextDark"
-        android:text="This is where the latest message will be displayed"
-        android:textColor="#FFF"
-        app:layout_constraintTop_toBottomOf="@id/versionDisplay"
-        android:id="@+id/latestMessage" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/messagesView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="20dp"
-        app:stackFromEnd="true"
-        app:reverseLayout="true"
-        app:layout_constraintBottom_toTopOf="@+id/messageEditContainer"
-        app:layout_constraintTop_toBottomOf="@+id/latestMessage" />
-
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/messageEditContainer"
+        android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
-            android:id="@+id/messageEdit"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:ems="10"
-            android:hint="@string/inputPlaceholder"
-            android:inputType="text"
-            android:text=""
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar_main"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/currAvatar"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginRight="40dp"
+            android:background="@drawable/avatar_received"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/messageSendBttn"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintEnd_toEndOf="@+id/toolbar"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/messageSendBttn"
+        <TextView
+            android:id="@+id/currUsernameDisplay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@color/colorPrimary"
-            android:text="@string/sendButtonText"
-            android:textAllCaps="true"
-            android:textColor="@android:color/white"
+            android:gravity="right|end"
+            android:text="username"
+            android:textColor="#fff"
+            android:textSize="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/messageEdit"
-            app:layout_constraintTop_toTopOf="parent"
-            android:onClick="sendMessgaqe" />
+            app:layout_constraintEnd_toStartOf="@+id/currAvatar"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
 
+    <TextView
+        android:id="@+id/noConversationNotice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginLeft="64dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginRight="64dp"
+        android:gravity="center"
+        android:text="No messages yet. Press the + button to start a conversation."
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/conversationsView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appBar" />
 </android.support.constraint.ConstraintLayout>

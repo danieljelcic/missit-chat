@@ -5,5 +5,9 @@
     <string name="sendButtonText">Send</string>
     <string name="message_sent_placeholder">My message</string>
     <string name="message_received_placeholder">Received message</string>
-    <string name="version">Version 0.11</string>
+    <string name="version">Version 0.2 DEV</string>
+    <string name="welcome_log_in_button">Log In</string>
+    <string name="welcome_register_button">Register</string>
+    <string name="log_out">Log Out</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>
