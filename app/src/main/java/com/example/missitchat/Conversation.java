@@ -1,22 +1,22 @@
 package com.example.missitchat;
 
-class Conversation {
+class Conversation implements Comparable<Conversation> {
 
-    private MemberData user;
-    private String latestMessage;
+    private User user;
+    private Message latestMessage;
     private boolean read;
 
-    public Conversation(MemberData user, String latestMessage, boolean read) {
+    public Conversation(User user, Message latestMessage, boolean read) {
         this.user = user;
         this.latestMessage = latestMessage;
         this.read = read;
     }
 
-    public MemberData getUser() {
+    public User getUser() {
         return user;
     }
 
-    public String getLatestMessage() {
+    public Message getLatestMessage() {
         return latestMessage;
     }
 
@@ -24,7 +24,7 @@ class Conversation {
         return read;
     }
 
-    public void setLatestMessage(String latestMessage) {
+    public void setLatestMessage(Message latestMessage) {
         this.latestMessage = latestMessage;
     }
 
@@ -39,5 +39,10 @@ class Conversation {
                 ", latestMessage='" + latestMessage + '\'' +
                 ", read=" + read +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Conversation o) {
+        return (int) (o.getLatestMessage().getTimestamp() - this.getLatestMessage().getTimestamp());
     }
 }

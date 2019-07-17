@@ -1,13 +1,17 @@
 package com.example.missitchat;
 
+import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -31,7 +35,7 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
     private EditText messageEdit;
     private MessageViewAdapter messageAdapter;
     private RecyclerView messagesView;
-    private MemberData otherUser;
+    private User otherUser;
     private String otherUid;
 
     // setup
@@ -52,24 +56,37 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance().getReference();
 
+
+        // loading messages
         database.child("Users").child(otherUid).addValueEventListener(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                otherUser = new MemberData(dataSnapshot.child("username").getValue().toString(),  dataSnapshot.child("color").getValue().toString());
+            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                otherUser = new User(dataSnapshot.child("username").getValue().toString(), otherUid, User.generateRandomColor());
 
                 Toolbar toolbar = findViewById(R.id.toolbar);
-                toolbar.setTitle(otherUser.getName());
+                toolbar.setTitle("");
+                toolbar.setBackgroundColor(ColorManager.getColor(otherUser.getName(), ColorManager.PRIMARY, ConversationActivity.this));
                 setSupportActionBar(toolbar);
+
+                View otherAvatar = findViewById(R.id.otherAvatar);
+                GradientDrawable avatar = (GradientDrawable) otherAvatar.getBackground();
+                avatar.setColor(ColorManager.getColor(otherUser.getName(), ColorManager.SECONDARY, ConversationActivity.this));
+                otherAvatar.setBackground(avatar);
+                ((TextView)findViewById(R.id.otherUsernameDisplay)).setText(otherUser.getName());
 
                 database.child("Conversations").child(auth.getCurrentUser().getUid()).child(otherUid).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot messages) {
-                        List messagesList = new ArrayList<Message>();
-                        for(DataSnapshot message : messages.getChildren()) {
-                            Message messageItem = new Message(message.child("body").getValue().toString(), otherUser, Boolean.parseBoolean(message.child("is_received").getValue().toString()));
-                            messagesList.add(messageItem);
+
+                        if (dataSnapshot.getValue() != null) {
+                            List messagesList = new ArrayList<Message>();
+                            for (DataSnapshot message : messages.getChildren()) {
+                                Message messageItem = new Message(message.child("body").getValue().toString(), otherUser, Boolean.parseBoolean(message.child("is_received").getValue().toString()), Long.parseLong(message.getKey().toString()));
+                                messagesList.add(messageItem);
+                            }
+                            messageAdapter.loadMessages(messagesList);
                         }
-                        messageAdapter.loadMessages(messagesList);
                     }
 
                     @Override
@@ -96,27 +113,50 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
         final HashMap<String, String> message = new HashMap<>();
         message.put("body", messageBody);
         message.put("is_received", "false");
+        message.put("missit", null);
 
+        // adding to current user's conversation
         database.child("Conversations").child(auth.getCurrentUser().getUid())
-            .child(otherUid).child(String.valueOf(timestamp)).setValue(message)
-            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()) {
-                        message.replace("is_received", "true");
-                        database.child("Conversations").child(otherUid)
-                            .child(auth.getCurrentUser().getUid()).child(String.valueOf(timestamp)).setValue(message)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    // add message to the view
-                                }
-                            });
-                    }
-                }
-            });
+                .child(otherUid).child(String.valueOf(timestamp)).setValue(message)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
 
-        messageEdit.setText("");
+                            message.remove("is_received");
+                            message.put("is_received", "true");
+                            // adding to other user's conversation
+                            database.child("Conversations").child(otherUid)
+                                    .child(auth.getCurrentUser().getUid()).child(String.valueOf(timestamp)).setValue(message)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            messageEdit.setText("");
+                                        }
+                                    });
+
+
+                        }
+                    }
+                });
+
+        // adding to current user's conversation list
+        database.child("Users").child(auth.getCurrentUser().getUid())
+                .child("conversation-list").child(otherUid).setValue(String.valueOf(timestamp))
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                // adding to other user's conversation list
+                database.child("Users").child(otherUid).child("conversation-list")
+                        .child(auth.getCurrentUser().getUid()).setValue(String.valueOf(timestamp))
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        //
+                    }
+                });
+            }
+        });
     }
 
     public void toast(final String message) {

@@ -52,14 +52,27 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
         android:layout_marginLeft="64dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="64dp"
         android:layout_marginRight="64dp"
+        android:layout_marginBottom="8dp"
         android:gravity="center"
-        android:text="No messages yet. Press the + button to start a conversation."
+        android:text=""
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/conversationsView" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/conversationsView"
+        app:layout_constraintEnd_toEndOf="@+id/conversationsView"
+        app:layout_constraintStart_toStartOf="@+id/conversationsView"
+        app:layout_constraintTop_toTopOf="@+id/conversationsView" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/conversationsView"

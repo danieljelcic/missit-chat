@@ -2,20 +2,26 @@ package com.example.missitchat;
 
 import java.util.Random;
 
-public class MemberData {
+public class User {
     private String name;
+    private String id;
     private String color;
 
-    public MemberData() {
+    public User() {
     }
 
-    public MemberData(String name, String color) {
+    public User(String name, String id, String color) {
         this.name = name;
+        this.id = id;
         this.color = color;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getColor() {
@@ -43,7 +49,7 @@ public class MemberData {
 
     @Override
     public String toString() {
-        return "MemberData{" +
+        return "User{" +
                 "name='" + name + '\'' +
                 ", color='" + color + '\'' +
                 '}';

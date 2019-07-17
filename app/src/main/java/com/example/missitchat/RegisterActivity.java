@@ -16,8 +16,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
@@ -53,16 +56,34 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                String username = usernameInput.getText().toString();
-                String email = emailInput.getText().toString();
-                String password = passwordInput.getText().toString();
+                final String username = usernameInput.getText().toString();
+                final String email = emailInput.getText().toString();
+                final String password = passwordInput.getText().toString();
 
                 if (TextUtils.isEmpty(username) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
                     Toast.makeText(RegisterActivity.this, "Please fill out all the fields", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(RegisterActivity.this, "Registering for " + username + ": " + email + " and " + password, Toast.LENGTH_SHORT).show();
-                    connectionProgress.show();
-                    registerFirebaseUser(username, email, password);
+
+                    database.child("Usernames").child(username).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                            Toast.makeText(RegisterActivity.this, dataSnapshot.getValue().toString(), Toast.LENGTH_SHORT).show();
+                            if(dataSnapshot.getValue() == null) {
+                                Toast.makeText(RegisterActivity.this, "Registering for " + username + ": " + email + " and " + password, Toast.LENGTH_SHORT).show();
+                                connectionProgress.show();
+                                registerFirebaseUser(username, email, password);
+                            } else {
+                                Toast.makeText(RegisterActivity.this, "Username already exists", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+
                 }
             }
         });
@@ -81,7 +102,7 @@ public class RegisterActivity extends AppCompatActivity {
                         final String uid = auth.getCurrentUser().getUid();
                         HashMap<String, String> userData = new HashMap<>();
                         userData.put("username", username);
-                        userData.put("color", MemberData.generateRandomColor());
+                        userData.put("color", User.generateRandomColor());
                         database.child("Users").child(uid).setValue(userData).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {

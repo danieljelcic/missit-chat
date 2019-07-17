@@ -2,32 +2,38 @@ package com.example.missitchat;
 
 public class Message {
     private String messageBody;
-    private MemberData memberData;
+    private User user;
+    private Long timestamp;
     private boolean received;
 
-    public Message(String messageBody, MemberData memberData, boolean received) {
+    public Message(String messageBody, User user, boolean received, Long timestamp) {
         this.messageBody = messageBody;
-        this.memberData = memberData;
+        this.user = user;
         this.received = received;
+        this.timestamp = timestamp;
     }
 
     public String getMessageBody() {
         return messageBody;
     }
 
-    public MemberData getMemberData() {
-        return memberData;
+    public User getUser() {
+        return user;
     }
 
     public boolean isReceived() {
         return received;
     }
 
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
     @Override
     public String toString() {
         return "Message{" +
                 "messageBody='" + messageBody + '\'' +
-                ", memberData=" + memberData.toString() +
+                ", user=" + user.toString() +
                 ", received=" + received +
                 '}';
     }

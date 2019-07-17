@@ -10,16 +10,50 @@
     tools:showIn="@layout/activity_conversation">
 
 
-    <include layout="@layout/toolbar_main"
-        android:id="@+id/toolbar"
-        app:layout_constraintTop_toTopOf="parent" />
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar_main"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/otherAvatar"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:background="@drawable/avatar_received"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/toolbar"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/otherUsernameDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:gravity="left|start"
+            android:text="username"
+            android:textColor="#fff"
+            android:textSize="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/otherAvatar"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/messagesView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/messageEditContainer"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/appBar"
         app:reverseLayout="true"
         app:stackFromEnd="true" />
 
@@ -54,7 +88,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
-            android:background="@color/colorPrimary"
+            android:background="@color/primaryColor"
             android:onClick="sendMessage"
             android:text="@string/sendButtonText"
             android:textAllCaps="true"

@@ -4,9 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:focusable="true"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"
     android:id="@+id/conversation_list_item_layout">
 
-    <View
+    <TextView
         android:id="@+id/listReceivedAvatar"
         android:layout_width="65dp"
         android:layout_height="65dp"
@@ -15,6 +18,9 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/avatar_received"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -29,6 +35,17 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/listReceivedAvatar"
+        app:layout_constraintTop_toTopOf="@+id/listReceivedAvatar" />
+
+    <TextView
+        android:id="@+id/listReceivedTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:text="ti:me"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="@+id/listReceivedMessage"
         app:layout_constraintTop_toTopOf="@+id/listReceivedAvatar" />
 
     <TextView

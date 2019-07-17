@@ -1,8 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="primaryColor">#f47b00</color>
+    <color name="primaryLightColor">#ffac42</color>
+    <color name="primaryDarkColor">#ba4c00</color>
+    <color name="secondaryColor">#ba68c8</color>
+    <color name="secondaryLightColor">#ee98fb</color>
+    <color name="secondaryDarkColor">#883997</color>
     <color name="colorMessageLight">#CFCFCF</color>
     <color name="colorMessageTextDark">#000000</color>
+
+    <!--MissIt Colors-->
+    <color name="primaryColor1">#e91e63</color>
+    <color name="secondaryColor1">#4fc3f7</color>
+    <color name="primaryColor2">#673ab7</color>
+    <color name="secondaryColor2">#4dd0e1</color>
+    <color name="primaryColor3">#1976d2</color>
+    <color name="secondaryColor3">#aed681</color>
+    <color name="primaryColor4">#00bcd4</color>
+    <color name="secondaryColor4">#ffd54f</color>
+    <color name="primaryColor5">#8bc34a</color>
+    <color name="secondaryColor5">#ff8a65</color>
+    <color name="primaryColor6">#ffc107</color>
+    <color name="secondaryColor6">#f06292</color>
+    <color name="primaryColor7">#f47b00</color>
+    <color name="secondaryColor7">#ba68c8</color>
 </resources>

@@ -136,11 +136,11 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
             // get the circle drawable and set its background to user's color
             GradientDrawable avatar = (GradientDrawable) this.avatar.getBackground();
-            avatar.setColor(Color.parseColor(message.getMemberData().getColor()));
+            avatar.setColor(ColorManager.getColor(message.getUser().getName(), ColorManager.SECONDARY, context));
 
             // set view holder properties
             this.avatar.setBackground(avatar);
-            this.name.setText(message.getMemberData().getName());
+            this.name.setText(message.getUser().getName());
 
         }
     }

@@ -10,4 +10,13 @@
     <string name="welcome_register_button">Register</string>
     <string name="log_out">Log Out</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="NewConversationDialogTitle">Start New Conversation</string>
+    <string name="NewConversationDialogStartConversationButton">Start Conversation</string>
+    <string name="NewConversationDialogErrorUsernameDoesntExist">Username doesn\'t exist, try another one.</string>
+    <string name="NewConversationDialogErrorOwnUsername">That\'s your username, dummy!</string>
+    <string name="NewConversationDialogErrorConnection">Connection error. Please try again.</string>
+    <string name="NewConversationDialogErrorEmpty">Please enter a username.</string>
+    <string name="noConversationNoticeText">No messages yet. Press the + button to start a conversation.</string>
+
+
 </resources>
