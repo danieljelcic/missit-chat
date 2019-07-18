@@ -1,249 +1,60 @@
 package com.example.missitchat;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
     private DatabaseReference database;
-    private User currUser;
-    private RecyclerView conversationsView;
-    private ConversationViewAdapter conversationViewAdapter;
-    private ProgressBar progressBar;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // set up basic layout
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("MissIt Chat");
-        setSupportActionBar(toolbar);
 
-        // set up floating action button
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NewConversationDialogFragment newConvDialog = new NewConversationDialogFragment();
-                Bundle args = new Bundle();
-                args.putString("currUsername", currUser.getName());
-                newConvDialog.setArguments(args);
-                newConvDialog.show(getSupportFragmentManager(), "NewConversationDialogFragment");
-            }
-        });
 
-        // Firebase setup
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance().getReference();
 
-        conversationsView = findViewById(R.id.conversationsView);
-        conversationViewAdapter = new ConversationViewAdapter(this, new ConversationViewAdapter.OnConversationItemClickListener() {
-            @Override
-            public void onItemClick(Conversation conversation) {
-                String otherUid = conversation.getUser().getId();
-                Intent mainToConversationIntent = new Intent(MainActivity.this, ConversationActivity.class);
-                mainToConversationIntent.putExtra("otherUid", otherUid);
-                startActivity(mainToConversationIntent);
-            }
-        });
-        conversationsView.setAdapter(conversationViewAdapter);
-        conversationsView.setLayoutManager(new LinearLayoutManager(this));
-
-        progressBar = findViewById(R.id.progressBar);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onStart() {
         super.onStart();
 
-        progressBar.setVisibility(View.VISIBLE);
-
-        // check whether there's an auth instance
-        checkLogInStatus(MainActivity.this);
-
-        database.child("Users").child(auth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                currUser = new User(dataSnapshot.child("username").getValue().toString(), auth.getCurrentUser().getUid(), User.generateRandomColor());
-
-                (findViewById(R.id.toolbar)).setBackgroundColor(ColorManager.getColor(currUser.getName(), ColorManager.PRIMARY, MainActivity.this));
-
-                // set up display of curr user's info
-                View currAvatar = findViewById(R.id.currAvatar);
-                TextView currUsernameDisplay = findViewById(R.id.currUsernameDisplay);
-
-                GradientDrawable avatar = (GradientDrawable) currAvatar.getBackground();
-                avatar.setColor(ColorManager.getColor(currUser.getName(), ColorManager.SECONDARY, MainActivity.this));
-
-                currAvatar.setBackground(avatar);
-                currUsernameDisplay.setText(currUser.getName());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                toast("Error retrieving user data from Firebase");
-            }
-        });
-
-//        database.child("Conversations").child(auth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                List conversations = new ArrayList<Conversation>();
-//
-//                // clears the no conversations notice
-//                if (dataSnapshot.hasChildren()) {
-//                    ((TextView) findViewById(R.id.noConversationNotice)).setText("");
-//                }
-//
-//                for(DataSnapshot dataSnapshotChild : dataSnapshot.getChildren()) {
-//                    User user = new User(dataSnapshotChild.getKey().toString(), "#000000");
-//                    Conversation conversation = new Conversation(user, new Message("New message!", new User("", ""), true), false);
-//                    conversations.add(conversation);
-//                }
-//
-//                conversationViewAdapter.loadConversations(conversations);
-//            }
-
-        database.child("Users").child(auth.getCurrentUser().getUid()).child("conversation-list")
-                .addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot conversationsSnapshot) {
-
-                // clears the no conversations notice
-                if (conversationsSnapshot.hasChildren()) {
-
-                    final List conversations = new ArrayList<Conversation>();
-                    final Long[] size = {conversationsSnapshot.getChildrenCount()};
-
-                    for(DataSnapshot conversationSnapshot : conversationsSnapshot.getChildren()) {
-                        final String otherUid = conversationSnapshot.getKey();
-                        final String messageTimestamp = conversationSnapshot.getValue().toString();
-
-                        database.child("Users").child(otherUid).child("username")
-                                .addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot usernameSnapshot) {
-                                final User user = new User(usernameSnapshot.getValue().toString(), otherUid, User.generateRandomColor());
-
-                                database.child("Conversations").child(auth.getCurrentUser().getUid())
-                                        .child(otherUid).child(messageTimestamp)
-                                        .addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot messageSnapshot) {
-                                        String body = messageSnapshot.child("body").getValue().toString();
-                                        Boolean is_received = Boolean.parseBoolean(messageSnapshot.child("is_received").getValue().toString());
-
-                                        Conversation conversation = new Conversation(user, new Message(body, user, is_received, Long.parseLong(messageTimestamp)), true);
-                                        conversations.add(conversation);
-                                        size[0]--;
-                                        if (size[0] == 0) {
-                                            Collections.sort(conversations);
-                                            progressBar.setVisibility(View.GONE);
-                                            conversationViewAdapter.loadConversations(conversations);
-                                        }
-                                    }
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                                        toast("Failed loading conversations: " + databaseError.getMessage());
-                                    }
-                                });
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-                                toast("Failed loading conversations: " + databaseError.getMessage());
-                            }
-                        });
-                    }
-                } else {
-                    progressBar.setVisibility(View.GONE);
-                    ((TextView) findViewById(R.id.noConversationNotice)).setText(getResources().getString(R.string.noConversationNoticeText));
+        if (auth.getCurrentUser() != null) {
+            database.child("Users").child(auth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Intent mainToConversationListIntent = new Intent(MainActivity.this, ConversationListActivity.class);
+                    mainToConversationListIntent.putExtra("username", dataSnapshot.child("username").getValue().toString());
+                    mainToConversationListIntent.putExtra("uid", auth.getCurrentUser().getUid());
+                    startActivity(mainToConversationListIntent);
+                    finish();
                 }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                toast("Failed loading conversations: " + databaseError.getMessage());
-            }
-        });
-    }
 
-    // check if user is already logged in,
-    // if not, launch the welcome activity
-    private void checkLogInStatus(Context context) {
-        FirebaseUser currUser = auth.getCurrentUser();
-        if (currUser == null) {
-            Intent mainToWelcomeIntent = new Intent(context, WelcomeActivity.class);
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Toast.makeText(MainActivity.this, "Error retrieving user data from Firebase", Toast.LENGTH_SHORT).show();
+                    auth.signOut();
+                    Intent mainToWelcomeIntent = new Intent(MainActivity.this, WelcomeActivity.class);
+                    startActivity(mainToWelcomeIntent);
+                }
+            });
+        } else {
+            Intent mainToWelcomeIntent = new Intent(MainActivity.this, WelcomeActivity.class);
             startActivity(mainToWelcomeIntent);
-            finish();
         }
-    }
-
-    // menu in toolbar setup
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-
-        return true;
-    }
-
-    // click listeners for menu items in toolbar menu
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        super.onOptionsItemSelected(item);
-
-        switch (item.getItemId()) {
-            case R.id.logOutMenuItem : {
-                auth.signOut();
-                checkLogInStatus(MainActivity.this);
-            }
-        }
-
-        return true;
-    }
-
-
-    public void toast(final String message) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 }

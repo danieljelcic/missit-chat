@@ -1,48 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/messageReceivedLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingLeft="10dp"
-    android:paddingBottom="8dp"
-    android:id="@+id/messageReceivedLayout">
+    android:paddingTop="8dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="8dp">
 
     <TextView
-        android:id="@+id/receivedUsername"
+        android:id="@+id/timestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:text="Name Surname"
+        android:gravity="start|left"
+        android:text="Wed • 13:00"
         android:textSize="10dp"
-        app:layout_constraintStart_toEndOf="@+id/receivedAvatar"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-
-    <View
-        android:id="@+id/receivedAvatar"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:background="@drawable/avatar_received"
-        android:layout_marginTop="2dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/receivedUsername"/>
+        app:layout_constraintStart_toStartOf="@+id/messageBody"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/messageBody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="250dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="2dp"
         android:background="@drawable/message_bubble_received"
+        android:gravity="start|left"
+        android:maxWidth="250dp"
         android:paddingLeft="15dp"
         android:paddingTop="7dp"
         android:paddingRight="15dp"
         android:paddingBottom="7dp"
-        android:layout_marginTop="2dp"
         android:text="@string/message_received_placeholder"
-        android:textColor="@color/colorMessageTextDark"
+        android:textColor="#FFFFFF"
         android:textSize="@dimen/messageTextSize"
-        app:layout_constraintStart_toStartOf="@+id/receivedUsername"
-        app:layout_constraintTop_toBottomOf="@+id/receivedUsername" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/timestamp" />
 
 </android.support.constraint.ConstraintLayout>

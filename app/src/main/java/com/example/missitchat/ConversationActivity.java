@@ -40,8 +40,11 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
 
     // setup
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(ColorManager.getThemeId(getIntent().getStringExtra("username"), this));
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
 
@@ -51,50 +54,45 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
         messagesView.setAdapter(messageAdapter);
         messagesView.setLayoutManager(new LinearLayoutManager(this));
 
-        otherUid = getIntent().getStringExtra("otherUid");
+        otherUid = getIntent().getStringExtra("uid");
 
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance().getReference();
 
 
-        // loading messages
-        database.child("Users").child(otherUid).addValueEventListener(new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+        otherUser = new User(getIntent().getStringExtra("username"), getIntent().getStringExtra("uid"), User.generateRandomColor());
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("");
+        toolbar.setBackgroundColor(ColorManager.getThemeColor(ColorManager.PRIMARY, this));
+        setSupportActionBar(toolbar);
+
+        View otherAvatar = findViewById(R.id.otherAvatar);
+        GradientDrawable avatar = (GradientDrawable) otherAvatar.getBackground();
+        avatar.setColor(ColorManager.getColor(otherUser.getName(), ColorManager.SECONDARY, ConversationActivity.this));
+        otherAvatar.setBackground(avatar);
+        ((TextView)findViewById(R.id.otherUsernameDisplay)).setText(otherUser.getName());
+
+        messageEdit.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-                otherUser = new User(dataSnapshot.child("username").getValue().toString(), otherUid, User.generateRandomColor());
+            public void onClick(View v) {
+                messagesView.scrollToPosition(messageAdapter.getItemCount() - 1);
+            }
+        });
 
-                Toolbar toolbar = findViewById(R.id.toolbar);
-                toolbar.setTitle("");
-                toolbar.setBackgroundColor(ColorManager.getColor(otherUser.getName(), ColorManager.PRIMARY, ConversationActivity.this));
-                setSupportActionBar(toolbar);
+        database.child("Conversations").child(auth.getCurrentUser().getUid()).child(otherUid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot messages) {
 
-                View otherAvatar = findViewById(R.id.otherAvatar);
-                GradientDrawable avatar = (GradientDrawable) otherAvatar.getBackground();
-                avatar.setColor(ColorManager.getColor(otherUser.getName(), ColorManager.SECONDARY, ConversationActivity.this));
-                otherAvatar.setBackground(avatar);
-                ((TextView)findViewById(R.id.otherUsernameDisplay)).setText(otherUser.getName());
-
-                database.child("Conversations").child(auth.getCurrentUser().getUid()).child(otherUid).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot messages) {
-
-                        if (dataSnapshot.getValue() != null) {
-                            List messagesList = new ArrayList<Message>();
-                            for (DataSnapshot message : messages.getChildren()) {
-                                Message messageItem = new Message(message.child("body").getValue().toString(), otherUser, Boolean.parseBoolean(message.child("is_received").getValue().toString()), Long.parseLong(message.getKey().toString()));
-                                messagesList.add(messageItem);
-                            }
-                            messageAdapter.loadMessages(messagesList);
-                        }
+                if (messages.getValue() != null) {
+                    List messagesList = new ArrayList<Message>();
+                    for (DataSnapshot message : messages.getChildren()) {
+                        Message messageItem = new Message(message.child("body").getValue().toString(), otherUser, Boolean.parseBoolean(message.child("is_received").getValue().toString()), Long.parseLong(message.getKey().toString()));
+                        messagesList.add(messageItem);
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
+                    messageAdapter.loadMessages(messagesList);
+                    messagesView.scrollToPosition(messageAdapter.getItemCount() - 1);
+                }
             }
 
             @Override
@@ -102,8 +100,6 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
 
             }
         });
-
-
     }
 
     public void sendMessage(View view) {
@@ -132,6 +128,7 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             messageEdit.setText("");
+                                            messagesView.scrollToPosition(messageAdapter.getItemCount() - 1);
                                         }
                                     });
 

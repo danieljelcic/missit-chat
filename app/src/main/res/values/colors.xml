@@ -1,27 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryColor">#f47b00</color>
-    <color name="primaryLightColor">#ffac42</color>
-    <color name="primaryDarkColor">#ba4c00</color>
-    <color name="secondaryColor">#ba68c8</color>
-    <color name="secondaryLightColor">#ee98fb</color>
-    <color name="secondaryDarkColor">#883997</color>
+    <color name="primaryColor">#1976d2</color>
+    <color name="primaryLightColor">#63a4ff</color>
+    <color name="primaryDarkColor">#004ba0</color>
+    <color name="secondaryColor">#aed681</color>
+    <color name="secondaryLightColor">#e1ffb1</color>
+    <color name="secondaryDarkColor">#7da453</color>
     <color name="colorMessageLight">#CFCFCF</color>
     <color name="colorMessageTextDark">#000000</color>
 
     <!--MissIt Colors-->
     <color name="primaryColor1">#e91e63</color>
+    <color name="primaryColorDark1">#b0003a</color>
     <color name="secondaryColor1">#4fc3f7</color>
     <color name="primaryColor2">#673ab7</color>
+    <color name="primaryColorDark2">#320b86</color>
     <color name="secondaryColor2">#4dd0e1</color>
     <color name="primaryColor3">#1976d2</color>
+    <color name="primaryColorDark3">#004ba0</color>
     <color name="secondaryColor3">#aed681</color>
     <color name="primaryColor4">#00bcd4</color>
+    <color name="primaryColorDark4">#008ba3</color>
     <color name="secondaryColor4">#ffd54f</color>
     <color name="primaryColor5">#8bc34a</color>
+    <color name="primaryColorDark5">#5a9216</color>
     <color name="secondaryColor5">#ff8a65</color>
     <color name="primaryColor6">#ffc107</color>
+    <color name="primaryColorDark6">#c79100</color>
     <color name="secondaryColor6">#f06292</color>
     <color name="primaryColor7">#f47b00</color>
+    <color name="primaryColorDark7">#ba4c00</color>
     <color name="secondaryColor7">#ba68c8</color>
 </resources>

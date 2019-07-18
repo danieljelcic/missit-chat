@@ -8,55 +8,6 @@
         <item name="colorAccent">@color/secondaryColor</item>
     </style>
 
-    <style name="MissItTheme1" parent="AppTheme">
-        <!-- Customize your theme here. -->
-        <item name="android:colorPrimary">#e91e63</item>
-        <item name="colorPrimaryDark">#b0003a</item>
-        <item name="colorAccent">#4fc3f7</item>
-    </style>
-
-    <style name="MissItTheme2" parent="AppTheme">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">#673ab7</item>
-        <item name="colorPrimaryDark">#320b86</item>
-        <item name="colorAccent">#4dd0e1</item>
-    </style>
-
-    <style name="MissItTheme3" parent="AppTheme">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">#1976d2</item>
-        <item name="colorPrimaryDark">#004ba0</item>
-        <item name="colorAccent">#aed681</item>
-    </style>
-
-    <style name="MissItTheme4" parent="AppTheme">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">#00bcd4</item>
-        <item name="colorPrimaryDark">#008ba3</item>
-        <item name="colorAccent">#ffd54f</item>
-    </style>
-
-    <style name="MissItTheme5" parent="AppTheme">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">#8bc34a</item>
-        <item name="colorPrimaryDark">#5a9216</item>
-        <item name="colorAccent">#ff8a65</item>
-    </style>
-
-    <style name="MissItTheme6" parent="AppTheme">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">#ffc107</item>
-        <item name="colorPrimaryDark">#c79100</item>
-        <item name="colorAccent">#f06292</item>
-    </style>
-
-    <style name="MissItTheme7" parent="AppTheme">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">#f47b00</item>
-        <item name="colorPrimaryDark">#ba4c00</item>
-        <item name="colorAccent">#ba68c8</item>
-    </style>
-
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -75,4 +26,47 @@
 
     <style name="AppTheme.NoActionBar.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <!--MissIt Theme-->
+
+    <style name="MissItTheme1" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor1</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark1</item>
+        <item name="colorAccent">@color/secondaryColor1</item>
+    </style>
+
+    <style name="MissItTheme2" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor2</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark2</item>
+        <item name="colorAccent">@color/secondaryColor2</item>
+    </style>
+
+    <style name="MissItTheme3" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor3</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark3</item>
+        <item name="colorAccent">@color/secondaryColor3</item>
+    </style>
+
+    <style name="MissItTheme4" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor4</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark4</item>
+        <item name="colorAccent">@color/secondaryColor4</item>
+    </style>
+
+    <style name="MissItTheme5" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor5</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark5</item>
+        <item name="colorAccent">@color/secondaryColor5</item>
+    </style>
+
+    <style name="MissItTheme6" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor6</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark6</item>
+        <item name="colorAccent">@color/secondaryColor6</item>
+    </style>
+
+    <style name="MissItTheme7" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor7</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark7</item>
+        <item name="colorAccent">@color/secondaryColor7</item>
+    </style>
 </resources>

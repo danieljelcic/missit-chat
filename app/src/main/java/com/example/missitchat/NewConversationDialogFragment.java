@@ -60,7 +60,8 @@ public class NewConversationDialogFragment extends DialogFragment {
                             if (dataSnapshot.getValue() != null) {
 
                                 Intent newConversationDialogToConversationIntent = new Intent(getContext(), ConversationActivity.class);
-                                newConversationDialogToConversationIntent.putExtra("otherUid", dataSnapshot.getValue().toString());
+                                newConversationDialogToConversationIntent.putExtra("username", username);
+                                newConversationDialogToConversationIntent.putExtra("uid", dataSnapshot.getValue().toString());
                                 startActivity(newConversationDialogToConversationIntent);
                                 getDialog().dismiss();
 

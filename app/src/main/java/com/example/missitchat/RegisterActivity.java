@@ -102,7 +102,6 @@ public class RegisterActivity extends AppCompatActivity {
                         final String uid = auth.getCurrentUser().getUid();
                         HashMap<String, String> userData = new HashMap<>();
                         userData.put("username", username);
-                        userData.put("color", User.generateRandomColor());
                         database.child("Users").child(uid).setValue(userData).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {

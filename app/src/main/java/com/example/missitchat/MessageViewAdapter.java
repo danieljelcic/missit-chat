@@ -1,7 +1,6 @@
 package com.example.missitchat;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -107,10 +106,12 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
     class MessageHolder extends RecyclerView.ViewHolder {
 
         public TextView messageBody;
+        public TextView timestamp;
 
         public MessageHolder(@NonNull View itemView) {
             super(itemView);
             messageBody = itemView.findViewById(R.id.messageBody);
+            timestamp = itemView.findViewById(R.id.timestamp);
         }
 
         public void bindMessageData(Message message) {
@@ -126,21 +127,25 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
         public ReceivedMessageHolder(@NonNull View itemView) {
             super(itemView);
-            avatar = itemView.findViewById(R.id.receivedAvatar);
-            name = itemView.findViewById(R.id.receivedUsername);
         }
 
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
         public void bindReceivedMessageData(Message message) {
             this.bindMessageData(message);
 
-            // get the circle drawable and set its background to user's color
-            GradientDrawable avatar = (GradientDrawable) this.avatar.getBackground();
-            avatar.setColor(ColorManager.getColor(message.getUser().getName(), ColorManager.SECONDARY, context));
+//            // get the circle drawable and set its background to user's color
+//            GradientDrawable avatar = (GradientDrawable) this.avatar.getBackground();
+//            avatar.setColor(ColorManager.getColor(message.getUser().getName(), ColorManager.SECONDARY, context));
+//
+//            // set view holder properties
+//            this.avatar.setBackground(avatar);
+
+            // get the bubble drawable and set its background to user's color
+            GradientDrawable messageBubble = (GradientDrawable) this.messageBody.getBackground();
+            messageBubble.setColor(ColorManager.getThemeColor(ColorManager.PRIMARY, context));
 
             // set view holder properties
-            this.avatar.setBackground(avatar);
-            this.name.setText(message.getUser().getName());
+            this.messageBody.setBackground(messageBubble);
 
         }
     }
