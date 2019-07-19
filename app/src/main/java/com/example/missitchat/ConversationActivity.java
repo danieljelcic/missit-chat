@@ -3,6 +3,7 @@ package com.example.missitchat;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +38,7 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
     private EditText messageEdit;
     private MessageViewAdapter messageAdapter;
     private RecyclerView messagesView;
+    private Button sendButton;
     private User otherUser;
     private String otherUid;
 
@@ -49,6 +53,8 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
         setContentView(R.layout.activity_conversation);
 
         messageEdit = (EditText) findViewById(R.id.messageEdit);
+        sendButton = (Button) findViewById(R.id.messageSendBttn);
+
         messagesView = (RecyclerView) findViewById(R.id.messagesView);
         messageAdapter = new MessageViewAdapter(this);
         messagesView.setAdapter(messageAdapter);
@@ -72,13 +78,7 @@ public class ConversationActivity extends AppCompatActivity /* implements RoomLi
         avatar.setColor(ColorManager.getColor(otherUser.getName(), ColorManager.SECONDARY, ConversationActivity.this));
         otherAvatar.setBackground(avatar);
         ((TextView)findViewById(R.id.otherUsernameDisplay)).setText(otherUser.getName());
-
-        messageEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                messagesView.scrollToPosition(messageAdapter.getItemCount() - 1);
-            }
-        });
+        sendButton.setBackgroundColor(ColorManager.getThemeColor(ColorManager.SECONDARY, this));
 
         database.child("Conversations").child(auth.getCurrentUser().getUid()).child(otherUid).addValueEventListener(new ValueEventListener() {
             @Override

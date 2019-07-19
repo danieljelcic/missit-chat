@@ -45,9 +45,6 @@ public class ConversationListActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        setTheme(ColorManager.getThemeId(getIntent().getStringExtra("username"), this));
-
         super.onCreate(savedInstanceState);
 
         // set up basic layout
@@ -71,22 +68,6 @@ public class ConversationListActivity extends AppCompatActivity {
         // Firebase setup
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance().getReference();
-        currUser = new User(getIntent().getStringExtra("username"), getIntent().getStringExtra("uid"), User.generateRandomColor());
-
-        Bundle args = new Bundle();
-        args.putString("currUsername", currUser.getName());
-        newConvDialog.setArguments(args);
-
-        // set up basic user-related ui elems
-
-        View currAvatar = findViewById(R.id.currAvatar);
-        TextView currUsernameDisplay = findViewById(R.id.currUsernameDisplay);
-
-        GradientDrawable avatar = (GradientDrawable) currAvatar.getBackground();
-        avatar.setColor(ColorManager.getThemeColor(ColorManager.SECONDARY, ConversationListActivity.this));
-
-        currAvatar.setBackground(avatar);
-        currUsernameDisplay.setText(currUser.getName());
 
 
         conversationsView = findViewById(R.id.conversationsView);
@@ -114,6 +95,32 @@ public class ConversationListActivity extends AppCompatActivity {
         // check whether there's an auth instance
         checkLogInStatus(ConversationListActivity.this);
 
+        database.child("Users").child(auth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                currUser = new User(dataSnapshot.child("username").getValue().toString(), auth.getCurrentUser().getUid(), User.generateRandomColor());
+
+                Bundle args = new Bundle();
+                args.putString("currUsername", currUser.getName());
+                newConvDialog.setArguments(args);
+
+                // set up display of curr user's info
+                View currAvatar = findViewById(R.id.currAvatar);
+                TextView currUsernameDisplay = findViewById(R.id.currUsernameDisplay);
+
+                GradientDrawable avatar = (GradientDrawable) currAvatar.getBackground();
+                avatar.setColor(ColorManager.getColor(currUser.getName(), ColorManager.SECONDARY, ConversationListActivity.this));
+
+                currAvatar.setBackground(avatar);
+                currUsernameDisplay.setText(currUser.getName());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                toast("Error retrieving user data from Firebase");
+            }
+        });
 
         database.child("Users").child(auth.getCurrentUser().getUid()).child("conversation-list")
                 .addValueEventListener(new ValueEventListener() {

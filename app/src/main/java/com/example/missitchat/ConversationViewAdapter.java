@@ -85,7 +85,7 @@ public class ConversationViewAdapter extends RecyclerView.Adapter<ConversationVi
         public void bindConversationData(final Conversation conversation, final OnConversationItemClickListener listener) {
 
             String time = new SimpleDateFormat("EEE • HH:mm")
-                    .format(new Date(conversation.getLatestMessage().getTimestamp() * 1000));
+                    .format(new Date(conversation.getLatestMessage().getTimestamp()));
 
             // get the circle drawable and set its background to user's color
             GradientDrawable avatar = (GradientDrawable) this.avatar.getBackground();

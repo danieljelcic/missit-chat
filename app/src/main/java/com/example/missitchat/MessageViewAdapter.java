@@ -12,7 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -116,6 +118,8 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
         public void bindMessageData(Message message) {
             this.messageBody.setText(message.getMessageBody());
+            this.timestamp.setText(new SimpleDateFormat("EEE • HH:mm")
+                    .format(new Date(message.getTimestamp())));
         }
     }
 
