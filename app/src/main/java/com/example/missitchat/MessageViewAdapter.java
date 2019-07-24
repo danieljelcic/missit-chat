@@ -43,12 +43,12 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
         View messageView;
 
         if (i == 0) {
-            Log.d(TAG, "onCreateViewHolder: received");
+//            Log.d(TAG, "onCreateViewHolder: received");
             // inflate a new message_received layout and pass it to the ViewHolder constructor
             messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.message_received, viewGroup, false);
             return new ReceivedMessageHolder(messageView);
         } else {
-            Log.d(TAG, "onCreateViewHolder: sent");
+//            Log.d(TAG, "onCreateViewHolder: sent");
             // inflate a new message_sent layout and pass it to the ViewHolder constructor
             messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.message_sent, viewGroup, false);
             return new MessageHolder(messageView);
@@ -64,10 +64,10 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
     public void onBindViewHolder(@NonNull MessageHolder messageHolder, int i) {
 
         if (messages.get(i).isReceived()) {
-            Log.d(TAG, "onBindViewHolder: received for message [" + i + "] = " + messages.get(i));
+//            Log.d(TAG, "onBindViewHolder: received for message [" + i + "] = " + messages.get(i));
             ((ReceivedMessageHolder)messageHolder).bindReceivedMessageData(messages.get(i));
         } else {
-            Log.d(TAG, "onBindViewHolder: sent for message [" + i + "] = " + messages.get(i));
+//            Log.d(TAG, "onBindViewHolder: sent for message [" + i + "] = " + messages.get(i));
             messageHolder.bindMessageData(messages.get(i));
         }
     }
@@ -100,7 +100,7 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
     // used for debugging
     private void printMessages() {
         for (Message message : messages) {
-            Log.d("MESSAGE: ", message.toString());
+//            Log.d("MESSAGE: ", message.toString());
         }
     }
 

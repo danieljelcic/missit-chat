@@ -1,8 +1,12 @@
 package com.example.missitchat;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,19 +15,21 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 // need to add keyboard hider!
 
 public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEditViewAdapter.SuggestionEditHolder> {
 
-    private Context context;
-    private SuggestionEditRelayer relayer;
-    private List<Suggestion> suggestions;
+    public static final String TAG = "SuggestionsAdapter: ";
 
-    public SuggestionEditViewAdapter(Context context, SuggestionEditRelayer relayer) {
+    private Context context;
+    private SuggestionEditListener listener;
+    private ArrayList<Suggestion> suggestions;
+
+    public SuggestionEditViewAdapter(Context context, SuggestionEditListener relayer) {
         this.context = context;
-        this.relayer = relayer;
+        this.listener = relayer;
         this.suggestions = new ArrayList<>();
     }
 
@@ -36,7 +42,10 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
 
     @Override
     public void onBindViewHolder(@NonNull SuggestionEditHolder viewHolder, int i) {
-        viewHolder.bindSuggestionEditData(suggestions.get(i), i, this.relayer);
+        viewHolder.bindSuggestionEditData(suggestions.get(i), i, this.listener);
+        if (suggestions.get(i).getBody().isEmpty()) {
+            viewHolder.suggestionText.requestFocus();
+        }
     }
 
     @Override
@@ -46,14 +55,18 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
 
     public void addSuggestion(Suggestion suggestion) {
         this.suggestions.add(suggestion);
+        Log.d(TAG, "addSuggestion: Suggestions: " + suggestions.toString());
     }
 
     public void removeSuggestion(int position) {
+
         this.suggestions.remove(position);
+        Log.d(TAG, "removeSuggestion: Suggestions: " + suggestions.toString());
     }
 
     public void editSuggestion(Suggestion newSuggestion, int position) {
         this.suggestions.set(position, newSuggestion);
+        Log.d(TAG, "editSuggestion: Suggestions: " + suggestions.toString());
     }
 
     public String getSuggestionTextAt(int i) {
@@ -86,46 +99,56 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
             this.button = itemView.findViewById(R.id.doneEditingButton);
         }
 
-        public void bindSuggestionEditData(final Suggestion suggestion, final int position, final SuggestionEditRelayer relayer) {
+        public void bindSuggestionEditData(final Suggestion suggestion, final int position, final SuggestionEditListener listener) {
 
             this.suggestionNr.setText(String.valueOf(position + 1));
             this.suggestionText.setText(suggestion.getBody());
 
-            final View.OnClickListener resetDoneButton = new View.OnClickListener() {
+
+
+            button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View button) {
-                    relayer.removeSuggestion(position);
-                    ((ImageButton) button).setImageResource(R.drawable.ic_remove_circle_black_24dp);
+                    View currFocus = ((Activity) context).getCurrentFocus();
+                    if (currFocus != null) currFocus.clearFocus();
+
+                    suggestionText.setOnFocusChangeListener(null);
+                    listener.OnRemoveSuggestionButtonClick(position);
                 }
-            };
+            });
 
-            button.setOnClickListener(resetDoneButton);
+//            suggestionText.addTextChangedListener(new TextWatcher() {
+//                @Override
+//                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+//
+//                @Override
+//                public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                    listener.OnEditSuggestion(new Suggestion(s.toString()), position);
+//                }
+//
+//                @Override
+//                public void afterTextChanged(Editable s) {}
+//            });
 
-            suggestionText.setOnClickListener(new View.OnClickListener() {
+            suggestionText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
-                public void onClick(View textEdit) {
+                public void onFocusChange(View v, boolean hasFocus) {
 
-                    button.setImageResource(R.drawable.ic_check_circle_black_24dp);
-                    button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View button) {
-                            Suggestion newSuggestion = new Suggestion();
-                            newSuggestion.setBody(suggestionText.getText().toString());
-                            relayer.editSuggestion(newSuggestion, position);
-                            suggestionText.clearFocus();
-                            button.setOnClickListener(resetDoneButton);
-                        }
-                    });
-
+                    String editingSuggestionBody = ((EditText) v).getText().toString();
+                    if (editingSuggestionBody.isEmpty()) {
+//                            button.callOnClick();
+                    } else {
+                        listener.OnEditSuggestion(new Suggestion(editingSuggestionBody), position);
+                    }
                 }
             });
 
         }
     }
 
-    interface SuggestionEditRelayer {
-        public void removeSuggestion(int position);
-        public void editSuggestion(Suggestion suggestion, int position);
+    interface SuggestionEditListener {
+        public void OnRemoveSuggestionButtonClick(int position);
+        public void OnEditSuggestion(Suggestion suggestion, int position);
     }
 
     public static class Suggestion {
@@ -158,6 +181,11 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
 
         public void setBeingEdited(boolean beingEdited) {
             isBeingEdited = beingEdited;
+        }
+
+        @Override
+        public String toString() {
+            return body;
         }
     }
 }

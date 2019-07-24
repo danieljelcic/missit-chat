@@ -114,6 +114,13 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
         missitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                String currMessage = messageEdit.getText().toString();
+
+                if (currMessage.isEmpty()) {
+                    return;
+                }
+
                 Bundle args = new Bundle();
 
                 for (int i = 0; i < currSuggestions.size(); i++) {
@@ -122,7 +129,7 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
                     }
                 }
 
-                args.putString("currMessage", messageEdit.getText().toString());
+                args.putString("currMessage", currMessage);
 
                 suggestionsDialogFragment.setArguments(args);
                 suggestionsDialogFragment.show(getSupportFragmentManager(), "SuggestionEditDialog");
@@ -246,7 +253,6 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void OnSend(ArrayList<String> suggestionTexts) {
-        OnClose(suggestionTexts);
         sendButton.callOnClick();
     }
 }

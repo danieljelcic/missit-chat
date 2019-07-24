@@ -54,5 +54,5 @@
         app:layout_constraintBottom_toBottomOf="@+id/suggestionText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/suggestionText"
-        app:srcCompat="@drawable/ic_remove_circle_black_24dp" />
+        app:srcCompat="@drawable/ic_close_black_24dp" />
 </android.support.constraint.ConstraintLayout>

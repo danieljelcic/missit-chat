@@ -1,6 +1,7 @@
 package com.example.missitchat;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,9 +17,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import static android.support.constraint.Constraints.TAG;
-
 public class MissItSuggestionsDialogFragment extends DialogFragment {
+
+    public static final String TAG = "SuggestionsDialog: ";
 
     private TextView currMessageView;
     private ImageButton closeButton;
@@ -48,17 +49,19 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
         currMessageView.setText(currMessage);
 
         // set up recycler view
-        suggestionsViewAdapter = new SuggestionEditViewAdapter(getContext(), new SuggestionEditViewAdapter.SuggestionEditRelayer() {
+        suggestionsViewAdapter = new SuggestionEditViewAdapter(getContext(), new SuggestionEditViewAdapter.SuggestionEditListener() {
             @Override
-            public void removeSuggestion(int position) {
+            public void OnRemoveSuggestionButtonClick(int position) {
                 suggestionsViewAdapter.removeSuggestion(position);
                 suggestionsViewAdapter.notifyDataSetChanged();
+                Log.d(TAG, "removeSuggestion: at [" + position + "]");
             }
 
             @Override
-            public void editSuggestion(SuggestionEditViewAdapter.Suggestion suggestion, int position) {
+            public void OnEditSuggestion(SuggestionEditViewAdapter.Suggestion suggestion, int position) {
                 suggestionsViewAdapter.editSuggestion(suggestion, position);
-                suggestionsViewAdapter.notifyDataSetChanged();
+//                suggestionsViewAdapter.notifyDataSetChanged();
+                Log.d(TAG, "editSuggestion: at [" + position + "] -> " + suggestion.getBody());
             }
         });
         suggestionsView.setAdapter(suggestionsViewAdapter);
@@ -77,7 +80,6 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.OnClose(suggestionsViewAdapter.getSuggestionTexts());
                 getDialog().dismiss();
             }
         });
@@ -85,7 +87,10 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
         addSuggestionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.requestFocus();
                 suggestionsViewAdapter.addSuggestion(new SuggestionEditViewAdapter.Suggestion());
+
+                // this might be a problem
                 suggestionsViewAdapter.notifyDataSetChanged();
             }
         });
@@ -93,6 +98,7 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                getDialog().dismiss();
                 listener.OnSend(suggestionsViewAdapter.getSuggestionTexts());
             }
         });
@@ -128,5 +134,15 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
 //        int height = getContext().getResources().getDisplayMetrics().heightPixels;
         int height = getDialog().getWindow().getAttributes().height;
         getDialog().getWindow().setLayout(width, height);
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+
+        View currFocus = getActivity().getCurrentFocus();
+        if (currFocus != null) currFocus.clearFocus();
+
+        listener.OnClose(suggestionsViewAdapter.getSuggestionTexts());
     }
 }
