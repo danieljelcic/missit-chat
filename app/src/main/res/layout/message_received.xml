@@ -17,11 +17,11 @@
         android:gravity="start|left"
         android:text="Wed • 13:00"
         android:textSize="10dp"
-        app:layout_constraintStart_toStartOf="@+id/messageBody"
+        app:layout_constraintStart_toStartOf="@+id/currMessageBody"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/messageBody"
+        android:id="@+id/currMessageBody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

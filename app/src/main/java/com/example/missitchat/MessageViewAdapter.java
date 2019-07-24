@@ -112,14 +112,20 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
         public MessageHolder(@NonNull View itemView) {
             super(itemView);
-            messageBody = itemView.findViewById(R.id.messageBody);
+            messageBody = itemView.findViewById(R.id.currMessageBody);
             timestamp = itemView.findViewById(R.id.timestamp);
         }
 
         public void bindMessageData(Message message) {
             this.messageBody.setText(message.getMessageBody());
-            this.timestamp.setText(new SimpleDateFormat("EEE • HH:mm")
-                    .format(new Date(message.getTimestamp())));
+
+            String time = new SimpleDateFormat("EEE • HH:mm").format(new Date(message.getTimestamp()));
+
+            if (message.isMissit() && !message.isReceived()) {
+                this.timestamp.setText("Missit: " + time);
+            } else {
+                this.timestamp.setText(time);
+            }
         }
     }
 
