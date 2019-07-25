@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@null">
+
+    <TextView
+        android:id="@+id/timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="end|right"
+        android:text="Wed • 13:00"
+        android:textSize="10dp"
+        app:layout_constraintEnd_toEndOf="@+id/currMessageBody"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/suggestionsLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/message_bubble_received"
+        android:translationY="-16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/suggestionView"
+        app:layout_constraintEnd_toEndOf="@+id/suggestionView"
+        app:layout_constraintStart_toStartOf="@+id/suggestionView"
+        app:layout_constraintTop_toTopOf="@+id/suggestionView">
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/suggestionView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginRight="64dp"
+        android:paddingLeft="8dp"
+        android:paddingTop="18dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="10dp"
+        android:translationY="-16dp"
+        app:layout_constraintEnd_toEndOf="@+id/currMessageBody"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/currMessageBody">
+
+    </android.support.v7.widget.RecyclerView>
+
+    <!--<ImageButton
+        android:id="@+id/messageSendBttn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@null"
+        android:onClick="sendMessage"
+        android:tint="@color/primaryColor"
+        app:layout_constraintBottom_toBottomOf="@+id/constraintLayout2"
+        app:layout_constraintEnd_toEndOf="@+id/currMessageBody"
+        app:srcCompat="@drawable/ic_send_black_24dp" />-->
+
+    <TextView
+        android:id="@+id/currMessageBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/message_bubble_sent"
+        android:gravity="end|right"
+        android:maxWidth="250dp"
+        android:paddingLeft="15dp"
+        android:paddingTop="7dp"
+        android:paddingRight="15dp"
+        android:paddingBottom="7dp"
+        android:text="@string/message_sent_placeholder"
+        android:textColor="@color/colorMessageTextDark"
+        android:textSize="@dimen/messageTextSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/timestamp" />
+
+</android.support.constraint.ConstraintLayout>

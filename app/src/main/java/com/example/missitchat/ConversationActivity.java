@@ -85,6 +85,9 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
         otherAvatar.setBackground(avatar);
         ((TextView)findViewById(R.id.otherUsernameDisplay)).setText(otherUser.getName());
 
+        missitButton.setColorFilter(ColorManager.getThemeColor(ColorManager.SECONDARY, ConversationActivity.this));
+        sendButton.setColorFilter(ColorManager.getThemeColor(ColorManager.PRIMARY, ConversationActivity.this));
+
         database.child("Conversations").child(auth.getCurrentUser().getUid()).child(otherUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot messages) {
@@ -92,10 +95,31 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
                 if (messages.getValue() != null) {
                     List messagesList = new ArrayList<Message>();
                     for (DataSnapshot message : messages.getChildren()) {
-                        Message messageItem = new Message(message.child("body").getValue().toString(), otherUser, Boolean.parseBoolean(message.child("is_received").getValue().toString()), Long.parseLong(message.getKey().toString()));
+                        Message messageItem;
 
                         if (message.child("missit").getValue() != null) {
-                            messageItem.setMissit(true);
+                            ArrayList<String> suggestionsList = new ArrayList();
+
+                            for (int i = 0; i < 4; i++) {
+
+                                if(message.child("missit").hasChild("suggestion_" + (i+1))) {
+                                    String suggestion = message.child("missit").child("suggestion_" + (i+1)).getValue().toString();
+                                    suggestionsList.add(suggestion);
+                                }
+
+                            }
+                            MissItSuggestions suggestions = new MissItSuggestions(suggestionsList);
+                            suggestions.setResponseCode(Integer.parseInt(message.child("missit").child("res_code").getValue().toString()));
+                            suggestions.setStatusCode(Integer.parseInt(message.child("missit").child("status_code").getValue().toString()));
+                            messageItem = new Message(message.child("body").getValue().toString(), otherUser, Boolean.parseBoolean(message.child("is_received").getValue().toString()), Long.parseLong(message.getKey().toString()), suggestions);
+
+                            Log.d(TAG, "onDataChange: downloaded message {" + messageItem.getMessageBody()
+                                    + "with suggestions: " + messageItem.getMissItSuggestions().getSuggestions().toString() + ", size: " + messageItem.getMissItSuggestions().getSuggestions().size());
+                        } else {
+                            messageItem = new Message(message.child("body").getValue().toString(), otherUser, Boolean.parseBoolean(message.child("is_received").getValue().toString()), Long.parseLong(message.getKey().toString()));
+
+                            Log.d(TAG, "onDataChange: downloaded message {" + messageItem.getMessageBody()
+                                    + "with no missit suggestions");
                         }
 
                         messagesList.add(messageItem);
@@ -138,6 +162,9 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
     }
 
     public void sendMessage(View view) {
+
+        Log.d(TAG, "sendMessage: called");
+
         String messageBody = messageEdit.getText().toString();
 
         if (messageBody.isEmpty()) {
@@ -157,7 +184,8 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
             for (int i = 0; i < currSuggestions.size(); i++) {
                 missit.put("suggestion_" + (i + 1), currSuggestions.get(i));
             }
-            missit.put("res_code", "-1");
+            missit.put("res_code", String.valueOf(MissItSuggestions.RESPONSE_NO_RESPONSE));
+            missit.put("status_code", String.valueOf(MissItSuggestions.STATUS_RESPONSE_NOT_ATTEMPTED));
         }
 
         // adding to current user's conversation
@@ -190,6 +218,9 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
                                                         public void onComplete(@NonNull Task<Void> task) {
                                                             currSuggestions.clear();
                                                             findViewById(R.id.messageEditContainer).setBackgroundResource(0);
+                                                            missitButton.setColorFilter(ColorManager.getThemeColor(ColorManager.SECONDARY, ConversationActivity.this));
+                                                            sendButton.setColorFilter(ColorManager.getThemeColor(ColorManager.PRIMARY, ConversationActivity.this));
+                                                            findViewById(R.id.messageEditContainer).setBackgroundResource(0);
                                                             messageEdit.setText("");
                                                             messagesView.scrollToPosition(messageAdapter.getItemCount() - 1);
                                                         }
@@ -220,6 +251,9 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
                 });
             }
         });
+
+
+
     }
 
     public void toast(final String message) {
@@ -253,6 +287,8 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void OnSend(ArrayList<String> suggestionTexts) {
+        Log.d(TAG, "OnSend: called");
+        suggestionsDialogFragment.dismiss();
         sendButton.callOnClick();
     }
 }

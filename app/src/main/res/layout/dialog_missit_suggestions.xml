@@ -7,7 +7,7 @@
     android:background="@null">
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/constraintLayout2"
+        android:id="@+id/suggestionsLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -29,7 +29,7 @@
             android:layout_marginBottom="16dp"
             android:background="@drawable/avatar_received"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/suggestionEditView"
+            app:layout_constraintStart_toStartOf="@+id/suggestionView"
             app:srcCompat="@drawable/ic_add_white_24dp" />
 
         <ImageButton
@@ -45,7 +45,7 @@
             app:srcCompat="@drawable/ic_keyboard_arrow_down_black_24dp" />
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/suggestionEditView"
+            android:id="@+id/suggestionView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -62,7 +62,7 @@
         </android.support.v7.widget.RecyclerView>
     </android.support.constraint.ConstraintLayout>
 
-    <ImageButton
+    <!--<ImageButton
         android:id="@+id/messageSendBttn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -73,7 +73,7 @@
         android:tint="@color/primaryColor"
         app:layout_constraintBottom_toBottomOf="@+id/constraintLayout2"
         app:layout_constraintEnd_toEndOf="@+id/currMessageBody"
-        app:srcCompat="@drawable/ic_send_black_24dp" />
+        app:srcCompat="@drawable/ic_send_black_24dp" />-->
 
     <TextView
         android:id="@+id/currMessageBody"

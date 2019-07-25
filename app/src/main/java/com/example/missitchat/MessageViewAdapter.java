@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +23,13 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
     private static final String TAG = "MessageViewAdapter";
 
+    private static final int TYPE_RECEIVED = 0;
+    private static final int TYPE_SENT = 1;
+    private static final int TYPE_MISSIT_RECEIVED_UNANSWERED = 2;
+    private static final int TYPE_MISSIT_RECEIVED_ANSWERED = 3;
+    private static final int TYPE_MISSIT_SENT_UNANSWERED = 4;
+    private static final int TYPE_MISSIT_SENT_ANSWERED = 5;
+
     private List<Message> messages;
     private Context context;
 
@@ -32,7 +40,46 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
     @Override
     public int getItemViewType(int position) {
-        return messages.get(position).isReceived() ? 0 : 1;
+
+        int type;
+        Message message = messages.get(position);
+
+        if (message.getMissItSuggestions() == null) {
+            if (message.isReceived()) {
+                type = TYPE_RECEIVED;
+            } else {
+                type = TYPE_SENT;
+            }
+
+            Log.d(TAG, "getItemViewType: getting item type " + type + " for:"
+                    + " isMissit = " + (message.getMissItSuggestions() != null)
+                    + ", isReceived = " + message.isReceived());
+        } else {
+
+            boolean isUnanswered = message.getMissItSuggestions().getStatusCode() != MissItSuggestions.STATUS_RESPONSE_SUCCESS
+                    || message.getMissItSuggestions().getStatusCode() != MissItSuggestions.STATUS_RESPONSE_TRANSMITTING;
+
+            if (message.isReceived()) {
+                if (isUnanswered) {
+                    type = TYPE_MISSIT_RECEIVED_UNANSWERED;
+                } else {
+                    type = TYPE_MISSIT_RECEIVED_ANSWERED;
+                }
+            } else {
+                if (isUnanswered) {
+                    type = TYPE_MISSIT_SENT_UNANSWERED;
+                } else {
+                    type = TYPE_MISSIT_SENT_ANSWERED;
+                }
+            }
+
+            Log.d(TAG, "getItemViewType: getting item type " + type + " for:"
+                    + " isMissit = " + (message.getMissItSuggestions() != null)
+                    + ", isReceived = " + message.isReceived()
+                    + ", isUnanswered = " + isUnanswered);
+        }
+
+        return type;
     }
 
     // creates a new (here, empty) ViewHolder based on a layout passed into the layout inflater
@@ -42,16 +89,25 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
         View messageView;
 
-        if (i == 0) {
+        Log.d(TAG, "onCreateViewHolder: creating view of type " + i);
+
+        if (i == TYPE_RECEIVED) {
 //            Log.d(TAG, "onCreateViewHolder: received");
             // inflate a new message_received layout and pass it to the ViewHolder constructor
             messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.message_received, viewGroup, false);
             return new ReceivedMessageHolder(messageView);
-        } else {
+        } else if (i == TYPE_SENT) {
 //            Log.d(TAG, "onCreateViewHolder: sent");
             // inflate a new message_sent layout and pass it to the ViewHolder constructor
             messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.message_sent, viewGroup, false);
             return new MessageHolder(messageView);
+        } else if (i == TYPE_MISSIT_SENT_UNANSWERED) {
+            Log.d(TAG, "onCreateViewHolder: creating missit sent unanswered message");
+            messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_message_sent_unanswered, viewGroup, false);
+            return new MissitUnansweredMessageHolder(messageView);
+        } else {
+            Log.d(TAG, "onCreateViewHolder: creating fallback empty message");
+            return new MessageHolder(new View(context));
         }
     }
 
@@ -63,12 +119,15 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
     @Override
     public void onBindViewHolder(@NonNull MessageHolder messageHolder, int i) {
 
-        if (messages.get(i).isReceived()) {
+        if (getItemViewType(i) == TYPE_RECEIVED) {
 //            Log.d(TAG, "onBindViewHolder: received for message [" + i + "] = " + messages.get(i));
             ((ReceivedMessageHolder)messageHolder).bindReceivedMessageData(messages.get(i));
-        } else {
+        } else if (getItemViewType(i) == TYPE_SENT) {
 //            Log.d(TAG, "onBindViewHolder: sent for message [" + i + "] = " + messages.get(i));
             messageHolder.bindMessageData(messages.get(i));
+        } else if (getItemViewType(i) == TYPE_MISSIT_SENT_UNANSWERED) {
+            Log.d(TAG, "onBindViewHolder: binding missit sent unanswered message");
+            ((MissitUnansweredMessageHolder)messageHolder).bindMissitUnansweredMessageData(messages.get(i));
         }
     }
 
@@ -121,7 +180,7 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
             String time = new SimpleDateFormat("EEE • HH:mm").format(new Date(message.getTimestamp()));
 
-            if (message.isMissit() && !message.isReceived()) {
+            if (message.getMissItSuggestions() != null && !message.isReceived()) {
                 this.timestamp.setText("Missit: " + time);
             } else {
                 this.timestamp.setText(time);
@@ -156,6 +215,36 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
             // set view holder properties
             this.messageBody.setBackground(messageBubble);
+
+        }
+    }
+
+    class MissitUnansweredMessageHolder extends MessageHolder {
+
+        private TextView sentMessage;
+        private View suggestionsLayout;
+        private RecyclerView suggestionView;
+
+        public MissitUnansweredMessageHolder(@NonNull View itemView) {
+            super(itemView);
+
+            suggestionsLayout = itemView.findViewById(R.id.suggestionsLayout);
+            suggestionView = itemView.findViewById(R.id.suggestionView);
+
+            ColorManager.setDrawableBackgroundColor(suggestionsLayout, ColorManager.getThemeColor(ColorManager.PRIMARY, context));
+        }
+
+        public void bindMissitUnansweredMessageData(Message message) {
+            this.bindMessageData(message);
+
+            Log.d(TAG, "bindMissitUnansweredMessageData: passing to SuggestionViewAdapter: " + message.getMissItSuggestions().getSuggestions().toString() + ", size: " + message.getMissItSuggestions().getSuggestions().size());
+
+            SuggestionViewAdapter adapter = new SuggestionViewAdapter(context, message.getMissItSuggestions(), SuggestionViewAdapter.TYPE_SENT, null);
+
+            suggestionView.setAdapter(adapter);
+            suggestionView.setLayoutManager(new LinearLayoutManager(context));
+
+            adapter.notifyDataSetChanged();
 
         }
     }

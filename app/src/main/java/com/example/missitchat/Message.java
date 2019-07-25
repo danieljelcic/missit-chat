@@ -5,14 +5,18 @@ public class Message {
     private User user;
     private Long timestamp;
     private boolean received;
-    private boolean isMissit;
+    private MissItSuggestions missIt;
 
-    public Message(String messageBody, User user, boolean received, Long timestamp) {
+    public Message(String messageBody, User user, boolean received, Long timestamp, MissItSuggestions suggestions) {
         this.messageBody = messageBody;
         this.user = user;
         this.received = received;
         this.timestamp = timestamp;
-        this.isMissit = false;
+        this.missIt = suggestions;
+    }
+
+    public Message(String messageBody, User user, boolean received, Long timestamp) {
+        this(messageBody, user, received, timestamp, null);
     }
 
     public String getMessageBody() {
@@ -23,8 +27,8 @@ public class Message {
         return user;
     }
 
-    public boolean isMissit() {
-        return isMissit;
+    public MissItSuggestions getMissItSuggestions() {
+        return missIt;
     }
 
     public boolean isReceived() {
@@ -33,10 +37,6 @@ public class Message {
 
     public Long getTimestamp() {
         return timestamp;
-    }
-
-    public void setMissit(boolean missit) {
-        isMissit = missit;
     }
 
     @Override

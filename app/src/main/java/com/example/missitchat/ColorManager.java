@@ -2,7 +2,11 @@ package com.example.missitchat;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.TypedValue;
+import android.view.View;
 
 public class ColorManager {
 
@@ -131,5 +135,13 @@ public class ColorManager {
         } else {
             return defaultColor;
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    public static void setDrawableBackgroundColor(View view, int color) {
+
+        GradientDrawable viewBg = (GradientDrawable) view.getBackground();
+        viewBg.setColor(color);
+        view.setBackground(viewBg);
     }
 }

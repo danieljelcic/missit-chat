@@ -1,11 +1,11 @@
 package com.example.missitchat;
 
-import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,9 +21,10 @@ import java.util.ArrayList;
 
 public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEditViewAdapter.SuggestionEditHolder> {
 
-    public static final String TAG = "SuggestionsAdapter: ";
+    public static final String TAG = "SuggestionsAdapter";
 
     private Context context;
+    private RecyclerView parentView;
     private SuggestionEditListener listener;
     private ArrayList<Suggestion> suggestions;
 
@@ -36,7 +37,7 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
     @NonNull
     @Override
     public SuggestionEditHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View suggestionEditView  = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_suggestion, viewGroup, false);
+        View suggestionEditView  = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_suggestion_editable, viewGroup, false);
         return new SuggestionEditHolder(suggestionEditView);
     }
 
@@ -49,19 +50,49 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
     }
 
     @Override
+    public void onViewRecycled(@NonNull SuggestionEditHolder holder) {
+        super.onViewRecycled(holder);
+
+        holder.suggestionText.setOnFocusChangeListener(null);
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.parentView = recyclerView;
+    }
+
+    @Override
     public int getItemCount() {
         return this.suggestions.size();
     }
 
     public void addSuggestion(Suggestion suggestion) {
+
+        consolidateSuggestionEdits();
         this.suggestions.add(suggestion);
+        listener.OnSuggestionNumberChanged(getItemCount());
+        View lastSuggestion = this.parentView.getLayoutManager().findViewByPosition(getItemCount() - 1);
+        if (lastSuggestion != null) lastSuggestion.findViewById(R.id.suggestionText).callOnClick();
+        Log.d(TAG, "addSuggestion: lastSuggestion == null = " + (lastSuggestion == null));
         Log.d(TAG, "addSuggestion: Suggestions: " + suggestions.toString());
     }
 
     public void removeSuggestion(int position) {
 
+        consolidateSuggestionEdits();
         this.suggestions.remove(position);
+        listener.OnSuggestionNumberChanged(getItemCount());
+        int currSuggestionPosition = (position == getItemCount()) ? position - 1 : position;
+        View currSuggestion = this.parentView.getLayoutManager().findViewByPosition(currSuggestionPosition);
+        if (currSuggestion != null) currSuggestion.findViewById(R.id.suggestionText).callOnClick();
+        Log.d(TAG, "removeSuggestion: currSuggestion == null = " + (currSuggestion == null));
         Log.d(TAG, "removeSuggestion: Suggestions: " + suggestions.toString());
+    }
+
+    private void consolidateSuggestionEdits() {
+        View firstMessage = this.parentView.getLayoutManager().findViewByPosition(0);
+        if (firstMessage != null) firstMessage.requestFocus();
     }
 
     public void editSuggestion(Suggestion newSuggestion, int position) {
@@ -74,10 +105,17 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
     }
 
     public ArrayList<String> getSuggestionTexts() {
+
+        consolidateSuggestionEdits();
+
+
         ArrayList<String> suggestionsToReturn = new ArrayList<>();
 
         for (int i = 0; i < getItemCount(); i++) {
-            suggestionsToReturn.add(getSuggestionTextAt(i));
+            String currSuggestionText = getSuggestionTextAt(i);
+            if (!currSuggestionText.isEmpty()) {
+                suggestionsToReturn.add(getSuggestionTextAt(i));
+            }
         }
 
         return suggestionsToReturn;
@@ -99,23 +137,37 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
             this.button = itemView.findViewById(R.id.doneEditingButton);
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
         public void bindSuggestionEditData(final Suggestion suggestion, final int position, final SuggestionEditListener listener) {
 
             this.suggestionNr.setText(String.valueOf(position + 1));
             this.suggestionText.setText(suggestion.getBody());
 
-
+            GradientDrawable bubble = (GradientDrawable) suggestionText.getBackground();
+            bubble.setColor(ColorManager.getThemeColor(ColorManager.SECONDARY, context));
+            suggestionText.setBackground(bubble);
 
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View button) {
-                    View currFocus = ((Activity) context).getCurrentFocus();
-                    if (currFocus != null) currFocus.clearFocus();
+//                    parentLayout.requestFocus();
 
-                    suggestionText.setOnFocusChangeListener(null);
+//                    suggestionText.setOnFocusChangeListener(null);
                     listener.OnRemoveSuggestionButtonClick(position);
                 }
             });
+
+//            button.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//                @Override
+//                public void onFocusChange(View v, boolean hasFocus) {
+//                    if (hasFocus) {
+//                        Log.d(TAG, "onFocusChange: button now has focus");
+//                        v.callOnClick();
+//                    } else {
+//                        Log.d(TAG, "onFocusChange: button now lost focus");
+//                    }
+//                }
+//            });
 
 //            suggestionText.addTextChangedListener(new TextWatcher() {
 //                @Override
@@ -134,6 +186,13 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
 
+                    if (hasFocus) {
+                        Log.d(TAG, "onFocusChange: suggestion [" + position + "] has focus");
+                    } else {
+                        Log.d(TAG, "onFocusChange: suggestion [" + position + "] lost focus");
+                    }
+
+
                     String editingSuggestionBody = ((EditText) v).getText().toString();
                     if (editingSuggestionBody.isEmpty()) {
 //                            button.callOnClick();
@@ -149,6 +208,7 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
     interface SuggestionEditListener {
         public void OnRemoveSuggestionButtonClick(int position);
         public void OnEditSuggestion(Suggestion suggestion, int position);
+        public void OnSuggestionNumberChanged(int size);
     }
 
     public static class Suggestion {

@@ -2,9 +2,11 @@ package com.example.missitchat;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,18 +21,20 @@ import java.util.ArrayList;
 
 public class MissItSuggestionsDialogFragment extends DialogFragment {
 
-    public static final String TAG = "SuggestionsDialog: ";
+    public static final String TAG = "SuggestionsDialog";
 
     private TextView currMessageView;
     private ImageButton closeButton;
     private ImageButton addSuggestionButton;
-    private ImageButton sendButton;
+//    private ImageButton sendButton;
+    private View suggestionsLayout;
     private RecyclerView suggestionsView;
 
     private String currMessage;
     private SuggestionEditViewAdapter suggestionsViewAdapter;
     private SuggestionEditListener listener;
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -40,8 +44,13 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
         currMessageView = view.findViewById(R.id.currMessageBody);
         closeButton = view.findViewById(R.id.closeButton);
         addSuggestionButton = view.findViewById(R.id.addSuggestionButton);
-        sendButton = view.findViewById(R.id.messageSendBttn);
-        suggestionsView = view.findViewById(R.id.suggestionEditView);
+//        sendButton = view.findViewById(R.id.messageSendBttn);
+        suggestionsView = view.findViewById(R.id.suggestionView);
+        suggestionsLayout = view.findViewById(R.id.suggestionsLayout);
+
+
+        ColorManager.setDrawableBackgroundColor(suggestionsLayout, ColorManager.getThemeColor((ColorManager.PRIMARY), getContext()));
+        ColorManager.setDrawableBackgroundColor(addSuggestionButton, ColorManager.getThemeColor((ColorManager.SECONDARY), getContext()));
 
         // retrieve and display current message
         currMessage = getArguments().getString("currMessage");
@@ -63,6 +72,12 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
 //                suggestionsViewAdapter.notifyDataSetChanged();
                 Log.d(TAG, "editSuggestion: at [" + position + "] -> " + suggestion.getBody());
             }
+
+            @Override
+            public void OnSuggestionNumberChanged(int size) {
+                int visibility = (size > 3) ? View.INVISIBLE : View.VISIBLE;
+                addSuggestionButton.setVisibility(visibility);
+            }
         });
         suggestionsView.setAdapter(suggestionsViewAdapter);
         suggestionsView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -80,6 +95,7 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "onClick: close button clicked");
                 getDialog().dismiss();
             }
         });
@@ -87,7 +103,6 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
         addSuggestionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                v.requestFocus();
                 suggestionsViewAdapter.addSuggestion(new SuggestionEditViewAdapter.Suggestion());
 
                 // this might be a problem
@@ -95,13 +110,13 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
             }
         });
 
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getDialog().dismiss();
-                listener.OnSend(suggestionsViewAdapter.getSuggestionTexts());
-            }
-        });
+//        sendButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.d(TAG, "onClick: missit send button clicked");
+//                listener.OnSend(suggestionsViewAdapter.getSuggestionTexts());
+//            }
+//        });
 
 
         return view;
@@ -138,6 +153,7 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
 
     @Override
     public void onDismiss(DialogInterface dialog) {
+        Log.d(TAG, "onDismiss: suggestion edit dialog dismissed");
         super.onDismiss(dialog);
 
         View currFocus = getActivity().getCurrentFocus();
