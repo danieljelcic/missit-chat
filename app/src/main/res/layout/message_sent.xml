@@ -2,10 +2,12 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingRight="10dp"
-    android:paddingBottom="8dp"
+    android:paddingLeft="16dp"
+    android:paddingTop="6dp"
+    android:paddingRight="16dp"
     android:id="@+id/messageSentLayout" >
 
     <TextView
@@ -23,8 +25,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:background="@drawable/message_bubble_sent"
         android:gravity="end|right"
         android:maxWidth="250dp"
@@ -37,5 +37,44 @@
         android:textSize="@dimen/messageTextSize"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timestamp" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/sendingProgressContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/currMessageBody"
+        app:layout_constraintStart_toStartOf="@+id/currMessageBody"
+        app:layout_constraintTop_toBottomOf="@+id/currMessageBody">
+
+        <ProgressBar
+            android:id="@+id/sendingProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:indeterminate="false"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/remainingText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/remainingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end|right"
+            android:text="7 sec"
+            android:textSize="10dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/sendingProgressBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/sendingProgressBar" />
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

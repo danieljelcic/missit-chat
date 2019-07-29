@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class MissItSuggestionsDialogFragment extends DialogFragment {
+public class SuggestionEditDialogFragment extends DialogFragment {
 
     public static final String TAG = "SuggestionsDialog";
 
@@ -110,13 +110,6 @@ public class MissItSuggestionsDialogFragment extends DialogFragment {
             }
         });
 
-//        sendButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Log.d(TAG, "onClick: missit send button clicked");
-//                listener.OnSend(suggestionsViewAdapter.getSuggestionTexts());
-//            }
-//        });
 
 
         return view;

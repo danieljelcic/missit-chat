@@ -18,7 +18,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/message_bubble_suggestion"
+        android:background="@drawable/suggestion_bubble_sent"
         android:ems="10"
         android:hint="Add a suggestion"
         android:inputType="textPersonName"

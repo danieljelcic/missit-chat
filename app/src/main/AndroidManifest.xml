@@ -3,12 +3,9 @@
     package="com.example.missitchat">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -16,6 +13,7 @@
         <activity
             android:name=".ConversationListActivity"
             android:label="@string/title_activity_main"
+            android:icon="@drawable/ic_missit_icon_color"
             android:theme="@style/AppTheme.NoActionBar.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

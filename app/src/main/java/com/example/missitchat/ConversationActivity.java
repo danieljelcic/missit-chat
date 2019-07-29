@@ -29,8 +29,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-public class ConversationActivity extends AppCompatActivity implements MissItSuggestionsDialogFragment.SuggestionEditListener {
+public class ConversationActivity extends AppCompatActivity implements SuggestionEditDialogFragment.SuggestionEditListener {
 
     private static final String TAG = "ConversationActivity";
     private FirebaseAuth auth;
@@ -38,7 +39,7 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
     private EditText messageEdit;
     private MessageViewAdapter messageAdapter;
     private RecyclerView messagesView;
-    private MissItSuggestionsDialogFragment suggestionsDialogFragment;
+    private SuggestionEditDialogFragment suggestionsDialogFragment;
     private ArrayList<String> currSuggestions;
     private ImageButton sendButton;
     private ImageButton missitButton;
@@ -60,7 +61,12 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
         missitButton = findViewById(R.id.missitBttn);
 
         messagesView = findViewById(R.id.messagesView);
-        messageAdapter = new MessageViewAdapter(this);
+        messageAdapter = new MessageViewAdapter(this, new MessageViewAdapter.MissItResponseListener() {
+            @Override
+            public void OnSendMissitResponse(Message message, int res_code) {
+                sendMissitResponse(message, res_code);
+            }
+        });
         messagesView.setAdapter(messageAdapter);
         messagesView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -71,7 +77,7 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
         otherUid = getIntent().getStringExtra("uid");
         otherUser = new User(getIntent().getStringExtra("username"), getIntent().getStringExtra("uid"), User.generateRandomColor());
 
-        suggestionsDialogFragment = new MissItSuggestionsDialogFragment();
+        suggestionsDialogFragment = new SuggestionEditDialogFragment();
         currSuggestions = new ArrayList<>();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -111,6 +117,11 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
                             MissItSuggestions suggestions = new MissItSuggestions(suggestionsList);
                             suggestions.setResponseCode(Integer.parseInt(message.child("missit").child("res_code").getValue().toString()));
                             suggestions.setStatusCode(Integer.parseInt(message.child("missit").child("status_code").getValue().toString()));
+
+                            if (message.child("missit").hasChild("res_timestamp")) {
+                                suggestions.setResponseTimestamp(Long.parseLong(message.child("missit").child("res_timestamp").getValue().toString()));
+                            }
+
                             messageItem = new Message(message.child("body").getValue().toString(), otherUser, Boolean.parseBoolean(message.child("is_received").getValue().toString()), Long.parseLong(message.getKey().toString()), suggestions);
 
                             Log.d(TAG, "onDataChange: downloaded message {" + messageItem.getMessageBody()
@@ -161,6 +172,85 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
         });
     }
 
+    private void sendMissitResponse(Message message, final int res_code) {
+
+        final DatabaseReference currentConv = database.child("Conversations")
+                .child(auth.getCurrentUser().getUid()).child(otherUid);
+        final DatabaseReference otherConv = database.child("Conversations")
+                .child(otherUid).child(auth.getCurrentUser().getUid());
+        final String timestamp = message.getTimestamp().toString();
+        final DatabaseReference currStatusCode = currentConv.child(timestamp + "/missit/status_code");
+        final DatabaseReference otherStatusCode = otherConv.child(timestamp + "/missit/status_code");;
+        final DatabaseReference currResCode = currentConv.child(timestamp + "/missit/res_code");;
+        final DatabaseReference otherResCode = otherConv.child(timestamp + "/missit/res_code");;
+        final DatabaseReference currResTimestamp = otherConv.child(timestamp + "/missit/res_timestamp");;
+        final DatabaseReference otherResTimestamp = otherConv.child(timestamp + "/missit/res_timestamp");;
+
+        currResCode.setValue(res_code).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Log.d(TAG, "sendMissitResponse: set curr res code to " + res_code);
+            currStatusCode.setValue(MissItSuggestions.STATUS_RESPONSE_ESTABLISHING).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Log.d(TAG, "sendMissitResponse: set curr status code to ESTABLISHING");
+                    otherStatusCode.setValue(MissItSuggestions.STATUS_RESPONSE_TRANSMITTING).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Log.d(TAG, "sendMissitResponse: set other status code to TRANSMITTING");
+                            currStatusCode.setValue(MissItSuggestions.STATUS_RESPONSE_TRANSMITTING).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    Log.d(TAG, "sendMissitResponse: set curr status code to TRANSMITTING");
+
+                                            try {
+                                                TimeUnit.SECONDS.sleep((res_code + 1) * 3);
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                            final long timestamp = new Timestamp(System.currentTimeMillis()).getTime();
+
+                                            otherResCode.setValue(res_code).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    Log.d(TAG, "sendMissitResponse: set other res code to " + res_code);
+                                                    currResTimestamp.setValue(timestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            Log.d(TAG, "sendMissitResponse: set curr res timestamp to " + timestamp);
+                                                            currStatusCode.setValue(MissItSuggestions.STATUS_RESPONSE_SUCCESS).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    Log.d(TAG, "sendMissitResponse: set curr status code to SUCCESS");
+                                                                    otherResTimestamp.setValue(timestamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                            Log.d(TAG, "sendMissitResponse: set other res timestamp to " + timestamp);
+                                                                            otherStatusCode.setValue(MissItSuggestions.STATUS_RESPONSE_SUCCESS).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                @Override
+                                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                                    Log.d(TAG, "sendMissitResponse: set other status code to SUCCESS");
+                                                                                }
+                                                                            });
+                                                                    }
+                                                                });
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
     public void sendMessage(View view) {
 
         Log.d(TAG, "sendMessage: called");
@@ -186,6 +276,7 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
             }
             missit.put("res_code", String.valueOf(MissItSuggestions.RESPONSE_NO_RESPONSE));
             missit.put("status_code", String.valueOf(MissItSuggestions.STATUS_RESPONSE_NOT_ATTEMPTED));
+            missit.put("res_timestamp", String.valueOf(MissItSuggestions.TIMESTAMP_NO_TIMESTAMP));
         }
 
         // adding to current user's conversation
@@ -271,14 +362,18 @@ public class ConversationActivity extends AppCompatActivity implements MissItSug
 
         Log.d(TAG, "OnClose: Suggestions returned:" + suggestionTexts.toString());
 
+        View messageEditContainer = findViewById(R.id.messageEditContainer);
+
         currSuggestions = suggestionTexts;
 
+
         if (currSuggestions.isEmpty()) {
-            findViewById(R.id.messageEditContainer).setBackgroundResource(0);
+            messageEditContainer.setBackgroundResource(0);
             missitButton.setColorFilter(ColorManager.getThemeColor(ColorManager.SECONDARY, ConversationActivity.this));
             sendButton.setColorFilter(ColorManager.getThemeColor(ColorManager.PRIMARY, ConversationActivity.this));
         } else {
-            findViewById(R.id.messageEditContainer).setBackgroundResource(R.drawable.message_edit_container_bg);
+            messageEditContainer.setBackgroundResource(R.drawable.message_edit_container_bg);
+            ColorManager.setDrawableBackgroundColor(messageEditContainer, ColorManager.getThemeColor(ColorManager.PRIMARY, ConversationActivity.this));
             missitButton.setColorFilter(getResources().getColor(R.color.white));
             sendButton.setColorFilter(getResources().getColor(R.color.white));
         }

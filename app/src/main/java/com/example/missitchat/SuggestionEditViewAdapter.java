@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEditViewAdapter.SuggestionEditHolder> {
 
-    public static final String TAG = "SuggestionsAdapter";
+    public static final String TAG = "SuggestionEditAdapter";
 
     private Context context;
     private RecyclerView parentView;
@@ -150,37 +150,9 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View button) {
-//                    parentLayout.requestFocus();
-
-//                    suggestionText.setOnFocusChangeListener(null);
                     listener.OnRemoveSuggestionButtonClick(position);
                 }
             });
-
-//            button.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//                @Override
-//                public void onFocusChange(View v, boolean hasFocus) {
-//                    if (hasFocus) {
-//                        Log.d(TAG, "onFocusChange: button now has focus");
-//                        v.callOnClick();
-//                    } else {
-//                        Log.d(TAG, "onFocusChange: button now lost focus");
-//                    }
-//                }
-//            });
-
-//            suggestionText.addTextChangedListener(new TextWatcher() {
-//                @Override
-//                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-//
-//                @Override
-//                public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                    listener.OnEditSuggestion(new Suggestion(s.toString()), position);
-//                }
-//
-//                @Override
-//                public void afterTextChanged(Editable s) {}
-//            });
 
             suggestionText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
@@ -206,9 +178,9 @@ public class SuggestionEditViewAdapter extends RecyclerView.Adapter<SuggestionEd
     }
 
     interface SuggestionEditListener {
-        public void OnRemoveSuggestionButtonClick(int position);
-        public void OnEditSuggestion(Suggestion suggestion, int position);
-        public void OnSuggestionNumberChanged(int size);
+        void OnRemoveSuggestionButtonClick(int position);
+        void OnEditSuggestion(Suggestion suggestion, int position);
+        void OnSuggestionNumberChanged(int size);
     }
 
     public static class Suggestion {

@@ -78,6 +78,7 @@ public class ConversationListActivity extends AppCompatActivity {
                 mainToConversationIntent.putExtra("username", conversation.getUser().getName());
                 mainToConversationIntent.putExtra("uid", conversation.getUser().getId());
                 startActivity(mainToConversationIntent);
+                finish();
             }
         });
         conversationsView.setAdapter(conversationViewAdapter);

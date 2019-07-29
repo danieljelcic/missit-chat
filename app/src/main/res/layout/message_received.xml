@@ -5,10 +5,9 @@
     android:id="@+id/messageReceivedLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="10dp"
-    android:paddingTop="8dp"
-    android:paddingRight="10dp"
-    android:paddingBottom="8dp">
+    android:paddingLeft="16dp"
+    android:paddingTop="6dp"
+    android:paddingRight="16dp">
 
     <TextView
         android:id="@+id/timestamp"
@@ -24,8 +23,6 @@
         android:id="@+id/currMessageBody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginTop="2dp"
         android:background="@drawable/message_bubble_received"
         android:gravity="start|left"
@@ -39,5 +36,21 @@
         android:textSize="@dimen/messageTextSize"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timestamp" />
+
+    <ProgressBar
+        android:id="@+id/receivingProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/currMessageBody"
+        app:layout_constraintStart_toStartOf="@+id/currMessageBody"
+        app:layout_constraintTop_toBottomOf="@+id/currMessageBody" />
 
 </android.support.constraint.ConstraintLayout>

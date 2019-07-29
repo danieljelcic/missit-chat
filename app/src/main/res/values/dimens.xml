@@ -1,4 +1,5 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="messageTextSize">16sp</dimen>
+    <dimen name="received_suggestion_onclick_translation">-37dp</dimen>
 </resources>

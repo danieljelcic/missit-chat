@@ -9,7 +9,7 @@
     <string name="welcome_log_in_button">Log In</string>
     <string name="welcome_register_button">Register</string>
     <string name="log_out">Log Out</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">MissIt Chat</string>
     <string name="NewConversationDialogTitle">Start New Conversation</string>
     <string name="NewConversationDialogStartConversationButton">Start Conversation</string>
     <string name="NewConversationDialogErrorUsernameDoesntExist">Username doesn\'t exist, try another one.</string>

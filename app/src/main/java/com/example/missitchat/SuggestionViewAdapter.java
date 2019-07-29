@@ -10,7 +10,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class SuggestionViewAdapter extends RecyclerView.Adapter<SuggestionViewAdapter.SuggestionViewHolder> {
 
@@ -52,21 +55,17 @@ public class SuggestionViewAdapter extends RecyclerView.Adapter<SuggestionViewAd
         if (i == TYPE_SENT) {
             Log.d(TAG, "onCreateViewHolder: creating sent suggestion view holder");
             suggestionsView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_suggestion_sent, viewGroup, false);
-            return new SuggestionViewHolder(suggestionsView);
+            return new SentSuggestionViewHolder(suggestionsView);
         } else {
             Log.d(TAG, "onCreateViewHolder: creating received suggestion view holder");
-            suggestionsView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_suggestion_sent, viewGroup, false);
+            suggestionsView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_suggestion_received, viewGroup, false);
             return new ReceivedSuggestionViewHolder(suggestionsView);
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull SuggestionViewHolder suggestionViewHolder, int i) {
-        if (getItemViewType(i) == TYPE_SENT) {
-            suggestionViewHolder.bindSuggestionViewHolderData(i);
-        } /*else {
-            ((ReceivedSuggestionViewHolder)suggestionViewHolder).bindReceivedSuggestionViewHolderData(i);
-        }*/
+        suggestionViewHolder.bindSuggestionViewHolderData(i);
     }
 
     @Override
@@ -76,8 +75,8 @@ public class SuggestionViewAdapter extends RecyclerView.Adapter<SuggestionViewAd
 
      class SuggestionViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView suggestionBody;
-        private TextView suggestionNr;
+        protected TextView suggestionBody;
+        protected TextView suggestionNr;
 
         public SuggestionViewHolder(@NonNull View itemView) {
 
@@ -97,26 +96,92 @@ public class SuggestionViewAdapter extends RecyclerView.Adapter<SuggestionViewAd
 
             suggestionNr.setText(String.valueOf(i+1));
             suggestionBody.setText(suggestion);
-
-            ColorManager.setDrawableBackgroundColor(suggestionBody, ColorManager.getThemeColor(ColorManager.SECONDARY, context));
         }
+     }
+
+     class SentSuggestionViewHolder extends SuggestionViewHolder {
+
+         public SentSuggestionViewHolder(@NonNull View itemView) {
+             super(itemView);
+             Log.d(TAG, "SentSuggestionViewHolder: creating sent suggestion view holder");
+         }
+
+         @Override
+         public void bindSuggestionViewHolderData(int i) {
+             super.bindSuggestionViewHolderData(i);
+             Log.d(TAG, "bindSentSuggestionViewHolderData: binding sent suggestion data");
+
+             ColorManager.setDrawableBackgroundColor(super.suggestionBody, ColorManager.getThemeColor(ColorManager.SECONDARY, context));
+         }
      }
 
     class ReceivedSuggestionViewHolder extends SuggestionViewHolder {
 
+        private ImageButton sendButton;
+        private View suggestionContainer;
+        private ProgressBar progressBar;
+
         public ReceivedSuggestionViewHolder(@NonNull View itemView) {
             super(itemView);
             Log.d(TAG, "ReceivedSuggestionViewHolder: creating received suggestion view holder");
+
+            this.sendButton = itemView.findViewById(R.id.suggestionSendBttn);
+            this.suggestionContainer = itemView.findViewById(R.id.receivedSuggestionContainer);
+            this.progressBar = itemView.findViewById(R.id.progressBar);
+
+            sendButton.setVisibility(View.INVISIBLE);
+            suggestionContainer.setTranslationX(0);
+            progressBar.setVisibility(View.INVISIBLE);
         }
 
-        
-        public void bindReceivedSuggestionViewHolderData(int i) {
-            this.bindSuggestionViewHolderData(i);
-            Log.d(TAG, "bindReceivedSuggestionViewHolderData: binding received suggestion data");
+        @Override
+        public void bindSuggestionViewHolderData(int i) {
+            super.bindSuggestionViewHolderData(i);
+
+            suggestionBody.setFocusableInTouchMode(true);
+
+            suggestionBody.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    if (suggestionBody.hasFocus()) {
+                        suggestionBody.clearFocus();
+                    } else {
+                        suggestionBody.requestFocus();
+                    }
+
+                    Log.d(TAG, "onClick: clicked suggestion #" + suggestionNr.getText());
+                }
+            });
+
+            suggestionBody.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        Log.d(TAG, "onFocusChange: suggestion #" + suggestionNr.getText() + " has focus");
+                        sendButton.setVisibility(View.VISIBLE);
+                        suggestionContainer.setTranslationX(context.getResources().getDimension(R.dimen.received_suggestion_onclick_translation));
+                    } else {
+                        Log.d(TAG, "onFocusChange: suggestion #" + suggestionNr.getText() + " lost focus");
+                        sendButton.setVisibility(View.INVISIBLE);
+                        suggestionContainer.setTranslationX(0);
+                    }
+                }
+            });
+
+            sendButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(context, "Should send suggestion #" + suggestionNr.getText() + ": " + suggestionBody.getText(), Toast.LENGTH_SHORT).show();
+                    listener.OnSuggestedResponseSendClick(Integer.parseInt(suggestionNr.getText().toString()) - 1);
+                    sendButton.setVisibility(View.INVISIBLE);
+                    progressBar.setVisibility(View.VISIBLE);
+                }
+            });
         }
     }
 
     interface SuggestedResponseSendListener {
-        void OnSuggestedResponseSend(int res_code);
+        void OnSuggestedResponseSendClick(int res_code);
     }
 }

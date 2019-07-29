@@ -5,14 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@null"
-    android:paddingLeft="16dp">
-
+    android:paddingRight="16dp">
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/suggestionsLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/message_bubble_received"
+        android:background="@drawable/suggestion_received_layout_bg"
         android:translationY="-16dp"
         app:layout_constraintBottom_toBottomOf="@+id/suggestionView"
         app:layout_constraintEnd_toEndOf="@+id/suggestionView"
@@ -25,35 +24,24 @@
         android:id="@+id/suggestionView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="64dp"
-        android:layout_marginRight="64dp"
-        android:paddingLeft="8dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginLeft="64dp"
+        android:paddingLeft="16dp"
         android:paddingTop="15dp"
-        android:paddingRight="16dp"
+        android:paddingRight="8dp"
         android:paddingBottom="20dp"
         android:translationY="-16dp"
-        app:layout_constraintEnd_toEndOf="@+id/currMessageContainer"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/currMessageContainer"
         app:layout_constraintTop_toBottomOf="@+id/currMessageContainer">
 
     </android.support.v7.widget.RecyclerView>
 
-    <!--<ImageButton
-        android:id="@+id/messageSendBttn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:background="@null"
-        android:onClick="sendMessage"
-        android:tint="@color/primaryColor"
-        app:layout_constraintBottom_toBottomOf="@+id/constraintLayout2"
-        app:layout_constraintEnd_toEndOf="@+id/currMessageBody"
-        app:srcCompat="@drawable/ic_send_black_24dp" />-->
 
     <include
         android:id="@+id/currMessageContainer"
-        layout="@layout/message_sent"
+        layout="@layout/message_received"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

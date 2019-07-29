@@ -9,15 +9,19 @@ public class MissItSuggestions {
     public final static int STATUS_RESPONSE_TRANSMITTING = 1;
     public final static int STATUS_RESPONSE_NOT_ATTEMPTED = 2;
     public final static int STATUS_RESPONSE_FAILED = 3;
+    public final static int STATUS_RESPONSE_ESTABLISHING = 4;
+    public final static int TIMESTAMP_NO_TIMESTAMP = 5;
 
     private ArrayList<String> suggestions;
     private int statusCode;
     private int responseCode;
+    private long responseTimestamp;
 
     public MissItSuggestions(ArrayList<String> suggestions) {
         this.suggestions = suggestions;
         statusCode = STATUS_RESPONSE_NOT_ATTEMPTED;
         responseCode = RESPONSE_NO_RESPONSE;
+        responseTimestamp = TIMESTAMP_NO_TIMESTAMP;
     }
 
     public int getStatusCode() {
@@ -41,12 +45,20 @@ public class MissItSuggestions {
         }
     }
 
+    public long getResponseTimestamp() {
+        return responseTimestamp;
+    }
+
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
     }
 
     public void setResponseCode(int responseCode) {
         this.responseCode = responseCode;
+    }
+
+    public void setResponseTimestamp(long responseTimestamp) {
+        this.responseTimestamp = responseTimestamp;
     }
 
     @Override

@@ -1,8 +1,10 @@
 package com.example.missitchat;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,12 +13,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.MessageHolder> {
@@ -32,10 +37,12 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
     private List<Message> messages;
     private Context context;
+    private MissItResponseListener missItResponseListener;
 
-    MessageViewAdapter(Context context) {
+    MessageViewAdapter(Context context, MissItResponseListener missItResponseListener) {
         this.messages = new ArrayList<>();
         this.context = context;
+        this.missItResponseListener = missItResponseListener;
     }
 
     @Override
@@ -56,8 +63,8 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
                     + ", isReceived = " + message.isReceived());
         } else {
 
-            boolean isUnanswered = message.getMissItSuggestions().getStatusCode() != MissItSuggestions.STATUS_RESPONSE_SUCCESS
-                    || message.getMissItSuggestions().getStatusCode() != MissItSuggestions.STATUS_RESPONSE_TRANSMITTING;
+            boolean isUnanswered = message.getMissItSuggestions().getStatusCode() == MissItSuggestions.STATUS_RESPONSE_NOT_ATTEMPTED
+                    || message.getMissItSuggestions().getStatusCode() == MissItSuggestions.STATUS_RESPONSE_FAILED;
 
             if (message.isReceived()) {
                 if (isUnanswered) {
@@ -100,11 +107,23 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 //            Log.d(TAG, "onCreateViewHolder: sent");
             // inflate a new message_sent layout and pass it to the ViewHolder constructor
             messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.message_sent, viewGroup, false);
-            return new MessageHolder(messageView);
+            return new SentMessageHolder(messageView);
         } else if (i == TYPE_MISSIT_SENT_UNANSWERED) {
             Log.d(TAG, "onCreateViewHolder: creating missit sent unanswered message");
             messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_message_sent_unanswered, viewGroup, false);
-            return new MissitUnansweredMessageHolder(messageView);
+            return new SentMissitUnansweredMessageHolder(messageView);
+        } else if (i == TYPE_MISSIT_RECEIVED_UNANSWERED) {
+            Log.d(TAG, "onCreateViewHolder: creating missit received unanswered message");
+            messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_message_received_unanswered, viewGroup, false);
+            return new ReceivedMissitUnansweredMessageHolder(messageView);
+        } else if (i == TYPE_MISSIT_SENT_ANSWERED) {
+            Log.d(TAG, "onCreateViewHolder: creating missit sent answered message");
+            messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_message_sent_answered, viewGroup, false);
+            return new SentMissitAnsweredMessageHolder(messageView);
+        } else if (i == TYPE_MISSIT_RECEIVED_ANSWERED) {
+            Log.d(TAG, "onCreateViewHolder: creating missit received answered message");
+            messageView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.missit_message_received_answered, viewGroup, false);
+            return new ReceivedMissitAnsweredMessageHolder(messageView);
         } else {
             Log.d(TAG, "onCreateViewHolder: creating fallback empty message");
             return new MessageHolder(new View(context));
@@ -118,17 +137,7 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onBindViewHolder(@NonNull MessageHolder messageHolder, int i) {
-
-        if (getItemViewType(i) == TYPE_RECEIVED) {
-//            Log.d(TAG, "onBindViewHolder: received for message [" + i + "] = " + messages.get(i));
-            ((ReceivedMessageHolder)messageHolder).bindReceivedMessageData(messages.get(i));
-        } else if (getItemViewType(i) == TYPE_SENT) {
-//            Log.d(TAG, "onBindViewHolder: sent for message [" + i + "] = " + messages.get(i));
-            messageHolder.bindMessageData(messages.get(i));
-        } else if (getItemViewType(i) == TYPE_MISSIT_SENT_UNANSWERED) {
-            Log.d(TAG, "onBindViewHolder: binding missit sent unanswered message");
-            ((MissitUnansweredMessageHolder)messageHolder).bindMissitUnansweredMessageData(messages.get(i));
-        }
+        messageHolder.bindMessageData(messages.get(i));
     }
 
     @Override
@@ -166,13 +175,15 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
     // implements a view holder as a basic message holder with just the message body
     class MessageHolder extends RecyclerView.ViewHolder {
 
-        public TextView messageBody;
-        public TextView timestamp;
+        protected TextView messageBody;
+        protected TextView timestamp;
+        protected View parentLayout;
 
         public MessageHolder(@NonNull View itemView) {
             super(itemView);
             messageBody = itemView.findViewById(R.id.currMessageBody);
             timestamp = itemView.findViewById(R.id.timestamp);
+            parentLayout = itemView;
         }
 
         public void bindMessageData(Message message) {
@@ -180,72 +191,276 @@ public class MessageViewAdapter extends RecyclerView.Adapter<MessageViewAdapter.
 
             String time = new SimpleDateFormat("EEE • HH:mm").format(new Date(message.getTimestamp()));
 
-            if (message.getMissItSuggestions() != null && !message.isReceived()) {
-                this.timestamp.setText("Missit: " + time);
-            } else {
-                this.timestamp.setText(time);
-            }
+            this.timestamp.setText(time);
         }
     }
 
-    // extends the message holder with name and avatar attributes for displaying received messages
-    class ReceivedMessageHolder extends MessageHolder {
 
-        public View avatar;
-        public TextView name;
+    final class SentMessageHolder extends MessageHolder {
+
+        public SentMessageHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+
+        @Override
+        public void bindMessageData(Message message) {
+            super.bindMessageData(message);
+
+            ColorManager.setDrawableBackgroundColor(this.messageBody, context.getResources().getColor(R.color.colorMessageLight));
+        }
+    }
+
+
+    // extends the message holder with name and avatar attributes for displaying received messages
+    final class ReceivedMessageHolder extends MessageHolder {
 
         public ReceivedMessageHolder(@NonNull View itemView) {
             super(itemView);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-        public void bindReceivedMessageData(Message message) {
-            this.bindMessageData(message);
-
-//            // get the circle drawable and set its background to user's color
-//            GradientDrawable avatar = (GradientDrawable) this.avatar.getBackground();
-//            avatar.setColor(ColorManager.getColor(message.getUser().getName(), ColorManager.SECONDARY, context));
-//
-//            // set view holder properties
-//            this.avatar.setBackground(avatar);
-
-            // get the bubble drawable and set its background to user's color
-            GradientDrawable messageBubble = (GradientDrawable) this.messageBody.getBackground();
-            messageBubble.setColor(ColorManager.getThemeColor(ColorManager.PRIMARY, context));
-
-            // set view holder properties
-            this.messageBody.setBackground(messageBubble);
-
+        @Override
+        public void bindMessageData(Message message) {
+            super.bindMessageData(message);
+            ColorManager.setDrawableBackgroundColor(this.messageBody, ColorManager.getThemeColor(ColorManager.SECONDARY, context));
         }
     }
 
-    class MissitUnansweredMessageHolder extends MessageHolder {
+    class MissitMessageHolder extends MessageHolder {
 
-        private TextView sentMessage;
-        private View suggestionsLayout;
-        private RecyclerView suggestionView;
+        public MissitMessageHolder(@NonNull View itemView) {
+            super(itemView);
+
+            View currMessageContainer = itemView.findViewById(R.id.currMessageContainer);
+
+            this.messageBody = currMessageContainer.findViewById(R.id.currMessageBody);
+            this.timestamp = currMessageContainer.findViewById(R.id.timestamp);
+        }
+    }
+
+
+    class MissitUnansweredMessageHolder extends MissitMessageHolder {
+
+        protected View suggestionsLayout;
+        protected RecyclerView suggestionView;
 
         public MissitUnansweredMessageHolder(@NonNull View itemView) {
             super(itemView);
 
             suggestionsLayout = itemView.findViewById(R.id.suggestionsLayout);
             suggestionView = itemView.findViewById(R.id.suggestionView);
+        }
+    }
 
-            ColorManager.setDrawableBackgroundColor(suggestionsLayout, ColorManager.getThemeColor(ColorManager.PRIMARY, context));
+
+    final class SentMissitUnansweredMessageHolder extends MissitUnansweredMessageHolder {
+
+        public SentMissitUnansweredMessageHolder(@NonNull View itemView) {
+            super(itemView);
+
+
+            ColorManager.setDrawableBackgroundColor(this.messageBody, context.getResources().getColor(R.color.colorMessageLight));
+            ColorManager.setDrawableBackgroundColor(this.suggestionsLayout, ColorManager.getThemeColor(ColorManager.PRIMARY, context));
         }
 
-        public void bindMissitUnansweredMessageData(Message message) {
-            this.bindMessageData(message);
+        @Override
+        public void bindMessageData(Message message) {
+            super.bindMessageData(message);
 
-            Log.d(TAG, "bindMissitUnansweredMessageData: passing to SuggestionViewAdapter: " + message.getMissItSuggestions().getSuggestions().toString() + ", size: " + message.getMissItSuggestions().getSuggestions().size());
+            SuggestionViewAdapter adapter = new SuggestionViewAdapter(context, message.getMissItSuggestions(), SuggestionViewAdapter.TYPE_SENT);
 
-            SuggestionViewAdapter adapter = new SuggestionViewAdapter(context, message.getMissItSuggestions(), SuggestionViewAdapter.TYPE_SENT, null);
-
-            suggestionView.setAdapter(adapter);
-            suggestionView.setLayoutManager(new LinearLayoutManager(context));
+            super.suggestionView.setAdapter(adapter);
+            super.suggestionView.setLayoutManager(new LinearLayoutManager(context));
 
             adapter.notifyDataSetChanged();
-
         }
+    }
+
+
+    final class ReceivedMissitUnansweredMessageHolder extends MissitUnansweredMessageHolder {
+
+        public ReceivedMissitUnansweredMessageHolder(@NonNull View itemView) {
+            super(itemView);
+
+            ColorManager.setDrawableBackgroundColor(this.messageBody, ColorManager.getThemeColor(ColorManager.SECONDARY, context));
+            ColorManager.setDrawableBackgroundColor(this.suggestionsLayout, ColorManager.getThemeColor(ColorManager.PRIMARY, context));
+        }
+
+        @Override
+        public void bindMessageData(final Message message) {
+            super.bindMessageData(message);
+
+
+            SuggestionViewAdapter adapter = new SuggestionViewAdapter(context, message.getMissItSuggestions(),
+                    SuggestionViewAdapter.TYPE_RECEIVED, new SuggestionViewAdapter.SuggestedResponseSendListener() {
+                @Override
+                public void OnSuggestedResponseSendClick(int res_code) {
+                    missItResponseListener.OnSendMissitResponse(message, res_code);
+                }
+            });
+
+            super.suggestionView.setAdapter(adapter);
+            super.suggestionView.setLayoutManager(new LinearLayoutManager(context));
+
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    class MissitAnsweredMessageHolder extends MissitMessageHolder {
+
+        protected TextView responseBody;
+        protected TextView responseTimestamp;
+
+        public MissitAnsweredMessageHolder(@NonNull View itemView) {
+            super(itemView);
+
+            View missitResponseContainer = itemView.findViewById(R.id.missitResponseContainer);
+
+            responseBody = missitResponseContainer.findViewById(R.id.currMessageBody);
+            responseTimestamp = missitResponseContainer.findViewById(R.id.timestamp);
+        }
+
+        @Override
+        public void bindMessageData(Message message) {
+            super.bindMessageData(message);
+
+            String text = "";
+
+            if (message.getMissItSuggestions().getStatusCode() == MissItSuggestions.STATUS_RESPONSE_TRANSMITTING
+                    && !message.isReceived()) {
+                text = "Receiving response...";
+            } else if (message.getMissItSuggestions().getResponseCode() != MissItSuggestions.RESPONSE_NO_RESPONSE) {
+                text = message.getMissItSuggestions().getSuggestionAt(message.getMissItSuggestions().getResponseCode());
+            } else {
+                text = "Something went wrong with this one.";
+            }
+
+            this.responseBody.setText(text);
+
+            if (message.getMissItSuggestions().getStatusCode() == MissItSuggestions.STATUS_RESPONSE_SUCCESS) {
+                String time = new SimpleDateFormat("EEE • HH:mm").format(new Date(message.getMissItSuggestions().getResponseTimestamp()));
+
+                this.responseTimestamp.setText(time);
+            } else {
+                responseTimestamp.setVisibility(View.GONE);
+            }
+        }
+    }
+
+
+    final class ReceivedMissitAnsweredMessageHolder extends MissitAnsweredMessageHolder {
+
+        private View progressContainer;
+        private ProgressBar sendingProgressBar;
+        private TextView progressText;
+
+        public ReceivedMissitAnsweredMessageHolder(@NonNull View itemView) {
+            super(itemView);
+
+            progressContainer = itemView.findViewById(R.id.missitResponseContainer).findViewById(R.id.sendingProgressContainer);
+            sendingProgressBar = progressContainer.findViewById(R.id.sendingProgressBar);
+            progressText = progressContainer.findViewById(R.id.remainingText);
+        }
+
+        @Override
+        public void bindMessageData(Message message) {
+            super.bindMessageData(message);
+
+            ColorManager.setDrawableBackgroundColor(this.messageBody, ColorManager.getThemeColor(ColorManager.SECONDARY, context));
+
+            if (message.getMissItSuggestions().getStatusCode() == MissItSuggestions.STATUS_RESPONSE_ESTABLISHING) {
+                progressContainer.setVisibility(View.VISIBLE);
+                progressText.setText("Connecting");
+                progressText.setVisibility(View.VISIBLE);
+            } else if (message.getMissItSuggestions().getStatusCode() == MissItSuggestions.STATUS_RESPONSE_TRANSMITTING) {
+                // the whole transmitting thing with the progress bar
+
+                final int maxTime = message.getMissItSuggestions().getResponseCode() + 1;
+                final int[] currTime = {0};
+
+                // max time in miliseconds
+                sendingProgressBar.setMax(maxTime * 3000);
+                sendingProgressBar.setProgress(currTime[0]);
+                progressText.setText(maxTime + " sec");
+
+                sendingProgressBar.setVisibility(View.VISIBLE);
+                progressText.setVisibility(View.VISIBLE);
+                progressContainer.setVisibility(View.VISIBLE);
+
+                final Timer timer = new Timer();
+                final Handler handler = new Handler();
+
+                final Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        // set progress and visibility
+
+                        if (currTime[0] <= sendingProgressBar.getMax()) {
+                            sendingProgressBar.setProgress(currTime[0]);
+
+                            // if current time is a full second
+                            if (currTime[0] % 3000 == 0) {
+                                // set the progress text to remaining time
+                                progressText.setText(maxTime - currTime[0] / 3000 + " sec");
+                            }
+                        } else {
+                            timer.cancel();
+                            sendingProgressBar.setVisibility(View.GONE);
+                            progressText.setVisibility(View.GONE);
+                            progressContainer.setVisibility(View.GONE);
+
+                        }
+                    }
+                };
+
+                // iterator; iterates i by 10 every 100 milliseconds, which gives a frame rate of 10/s
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        currTime[0] += 10;
+                        handler.post(runnable);
+                    }
+                }, 0, 100);
+
+
+            } else if (message.getMissItSuggestions().getStatusCode() == MissItSuggestions.STATUS_RESPONSE_SUCCESS) {
+
+                ColorManager.setDrawableBackgroundColor(this.responseBody, ColorManager.getThemeColor(ColorManager.PRIMARY, context));
+                this.responseBody.setTextColor(context.getResources().getColor(R.color.white));
+
+                sendingProgressBar.setVisibility(View.GONE);
+                progressText.setVisibility(View.GONE);
+                progressContainer.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    final class SentMissitAnsweredMessageHolder extends MissitAnsweredMessageHolder {
+
+        private ProgressBar receivingProgressBar;
+
+        public SentMissitAnsweredMessageHolder(@NonNull View itemView) {
+            super(itemView);
+
+            receivingProgressBar = itemView.findViewById(R.id.missitResponseContainer).findViewById(R.id.receivingProgressBar);
+        }
+
+        @Override
+        public void bindMessageData(Message message) {
+            super.bindMessageData(message);
+
+
+            ColorManager.setDrawableBackgroundColor(this.messageBody, context.getResources().getColor(R.color.colorMessageLight));
+            ColorManager.setDrawableBackgroundColor(this.responseBody, ColorManager.getThemeColor(ColorManager.PRIMARY, context));
+
+            if (message.getMissItSuggestions().getStatusCode() == MissItSuggestions.STATUS_RESPONSE_TRANSMITTING) {
+                receivingProgressBar.setVisibility(View.VISIBLE);
+            } else {
+                receivingProgressBar.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    interface MissItResponseListener {
+        void OnSendMissitResponse(Message message, int res_code);
     }
 }
