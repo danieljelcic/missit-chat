@@ -1,6 +1,6 @@
 **Team**
 
-Dr. Fahad Dogar / Research Project Lead    
+Dr. Fahad Dogar / Research Project Lead   
 Daniel Jelcic / Developer and Research Assistant
 
 
@@ -18,7 +18,7 @@ MissIt Chat is a messaging app for Android which, besides regular text messaging
 MissIt Chat does not implement the MissIt interface, but instead emulates the experience of a MissIt message exchange through the interface including suggested response bubbles, progress bars etc., and the underlying channels: SMS for RUR users and missed phone calls for RR users through a Firebase database protocol which requires an internet connection.
 
 The app is developed with the Android SDK, requiring the minimum SDK version 16 (Jelly Bean). Compile with Gradle (`app/build.gradle`).   
-A precompiled APK of version 0.3 is available in `app/build/outputs/apk/com.example.missitchat.v0.3.apk`.    
+A precompiled APK of version 0.3 is available in `app/build/outputs/apk/com.example.missitchat.v0.3.apk`.____
 Mockups can be found on Figma for the [RR user interface](https://www.figma.com/file/pBLc5BceUBaZF0TGcJA2yc/MissIt-Chat-Mockups-Restricted?node-id=0%3A1) and the [RUR user interface](https://www.figma.com/file/BATxx8RH6Gz726dWM2LZ8soS/MissIt-Chat-Mockups-Unrestricted).
 
 
@@ -46,27 +46,29 @@ Users can register with a username, email and a password, and can log in with an
 
 All of the MissIt server exchange is implemented through the Firebase realtime database. In the current implementation, no data is stored on user’s device and is only written to and read from on the cloud. The noSQL structure of database nodes is as follows:
 
+~~~
 Users[] :  
-_   uid :  
-_       username : {string}  
-_       conversation-list[] :  
-_           username : {timestamp long}  
+____uid :  
+________username : {string}  
+________conversation-list[] :  
+____________username : {timestamp long}  
 Usernames[] :  
-_   username : user_id  
+____username : user_id  
 Conversations[] :  
-_   uid :  
-_       other_uid :  
-_           timestamp :  
-_               body : {string}  
-_               is_received : {boolean}  
-_               missit : {null by default}  
-_                   suggestion_1 : {string}  
-_                   suggestion_2 : {string}  
-_                   suggestion_3 : {string}  
-_                   suggestion_4 : {string}  
-_                   res_code : {int, n for responded with suggestion_n+1, -1 for no response}  
-_                   status_code : {int, status codes as defined in the MissitSuggestions class}  
-_                   res_timestamp : {timestamp long}   
+____uid :  
+________other_uid :  
+____________timestamp :  
+________________body : {string}  
+________________is_received : {boolean}  
+________________missit : {null by default}  
+____________________suggestion_1 : {string}  
+____________________suggestion_2 : {string}  
+____________________suggestion_3 : {string}  
+____________________suggestion_4 : {string}  
+____________________res_code : {int, n for responded with suggestion_n+1, -1 for no response}  
+____________________status_code : {int, status codes as defined in the MissitSuggestions class}  
+____________________res_timestamp : {timestamp long}   
+~~~
 
 Nodes referred to as `node_name[]` are lists, and `{type}` mark types for key values.
 
